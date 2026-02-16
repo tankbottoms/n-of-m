@@ -36,7 +36,7 @@ export default function ResultScreen() {
         // If no mnemonic yet, reconstruct from shares directly (no PIN case)
         if (!mnemonic && state.shares.length > 0) {
           const shareBuffers: Buffer[] = state.shares.map(s =>
-            Buffer.from('0' + s.shareData, 'hex')
+            Buffer.from(s.shareData, 'hex')
           );
           const recovered = combine(shareBuffers);
           mnemonic = recovered.toString().trim();

@@ -33,9 +33,10 @@ export default function PinScreen() {
     setError(null);
 
     try {
-      // Extract raw share buffers from the payloads
+      // The shareData is already the full hex of the split() output buffer,
+      // which includes the leading '0' prefix byte. Pass it directly.
       const shareBuffers: Buffer[] = shares.map(s =>
-        Buffer.from('0' + s.shareData, 'hex')
+        Buffer.from(s.shareData, 'hex')
       );
 
       // Combine shares to recover the secret
