@@ -43,3 +43,13 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# env files
+.env
+.env.*
+
+# editor
+.idea/
+*.swp
+*.swo
+*~
