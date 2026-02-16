@@ -1,8 +1,8 @@
 import { gcm } from '@noble/ciphers/aes';
-import { randomBytes } from '@noble/ciphers/utils';
+import * as ExpoCrypto from 'expo-crypto';
 
 export async function encrypt(plaintext: string, keyHex: string): Promise<string> {
-  const nonce = randomBytes(12);
+  const nonce = ExpoCrypto.getRandomBytes(12);
   const keyBytes = hexToBytes(keyHex.slice(0, 64));
   const encoded = new TextEncoder().encode(plaintext);
 

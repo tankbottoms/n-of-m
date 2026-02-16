@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import * as ExpoCrypto from 'expo-crypto';
 import { generateSalt, deriveKey } from '../crypto/kdf';
 
 const MASTER_KEY_KEY = 'shamir_master_key';
@@ -8,8 +9,7 @@ const PIN_HASH_KEY = 'shamir_pin_hash';
 export async function initMasterKey(): Promise<string> {
   let key = await SecureStore.getItemAsync(MASTER_KEY_KEY);
   if (!key) {
-    const bytes = new Uint8Array(32);
-    crypto.getRandomValues(bytes);
+    const bytes = ExpoCrypto.getRandomBytes(32);
     key = Array.from(bytes)
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('');

@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer';
+import * as ExpoCrypto from 'expo-crypto';
 
 function random(size: number): Buffer {
-  const arr = new Uint8Array(32 + size);
-  crypto.getRandomValues(arr);
+  const arr = ExpoCrypto.getRandomBytes(32 + size);
   return Buffer.from(arr.slice(32));
 }
 

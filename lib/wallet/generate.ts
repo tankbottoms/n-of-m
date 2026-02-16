@@ -1,4 +1,5 @@
 import { Mnemonic } from 'ethers';
+import * as ExpoCrypto from 'expo-crypto';
 import { WordCount } from '../../constants/types';
 
 const WORD_COUNT_TO_ENTROPY: Record<WordCount, number> = {
@@ -8,8 +9,7 @@ const WORD_COUNT_TO_ENTROPY: Record<WordCount, number> = {
 export function generateMnemonic(wordCount: WordCount = 24, extraEntropy?: Uint8Array): string {
   const entropyBits = WORD_COUNT_TO_ENTROPY[wordCount];
   const entropyBytes = entropyBits / 8;
-  const entropy = new Uint8Array(entropyBytes);
-  crypto.getRandomValues(entropy);
+  const entropy = ExpoCrypto.getRandomBytes(entropyBytes);
 
   if (extraEntropy) {
     for (let i = 0; i < entropy.length; i++) {
