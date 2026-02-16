@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { NeoCard, NeoButton, NeoInput, NeoBadge } from '../../../components/neo';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
@@ -199,8 +200,27 @@ export default function SettingsScreen() {
                 Alert.alert('PIN Required', 'Set a PIN first before enabling vault authentication.');
                 return;
               }
+              if (val) {
+                // Verify identity before enabling
+                const compatible = await LocalAuthentication.hasHardwareAsync();
+                const enrolled = compatible && await LocalAuthentication.isEnrolledAsync();
+                if (enrolled) {
+                  const result = await LocalAuthentication.authenticateAsync({
+                    promptMessage: 'Verify your identity to enable vault protection',
+                    disableDeviceFallback: false,
+                  });
+                  if (!result.success) {
+                    Alert.alert('Authentication Failed', 'Vault protection was not enabled.');
+                    return;
+                  }
+                }
+                // If no biometrics, PIN is sufficient (already verified it's set)
+              }
               setVaultAuthRequired(val);
               await SecureStore.setItemAsync(VAULT_AUTH_KEY, val ? 'true' : 'false');
+              if (val) {
+                Alert.alert('Vault Protected', 'PIN or FaceID will be required to access the vault.');
+              }
             }}
             trackColor={{ false: '#DDD', true: highlight }}
             thumbColor={NEO.bg}
