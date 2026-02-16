@@ -42,6 +42,8 @@ export const NEO = {
   fontUI: 'SpaceGrotesk_400Regular',
   fontUIBold: 'SpaceGrotesk_700Bold',
   fontMono: 'SpaceMono_400Regular',
+  fontIcon: 'IosevkaNerdFont',
+  fontIconBold: 'IosevkaNerdFontBold',
 } as const;
 
 export const SHADOW = {

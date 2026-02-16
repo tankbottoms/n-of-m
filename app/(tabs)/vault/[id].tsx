@@ -13,7 +13,7 @@ import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { NeoCard, NeoButton, NeoBadge } from '../../../components/neo';
 import { MnemonicGrid } from '../../../components/MnemonicGrid';
 import { AddressRow } from '../../../components/AddressRow';
-import { NEO } from '../../../constants/theme';
+import { NEO, SHADOW } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { useVault } from '../../../hooks/useVault';
 import { DERIVATION_PATHS } from '../../../constants/derivation';
@@ -134,8 +134,8 @@ export default function VaultDetailScreen() {
           headerRight: () => (
             <View style={styles.headerActions}>
               <Pressable onPress={handleToggleLock} style={styles.headerBtn}>
-                <Text style={styles.headerBtnText}>
-                  {isLocked ? '[LOCKED]' : '[UNLOCKED]'}
+                <Text style={styles.lockIcon}>
+                  {isLocked ? '\uF023' : '\uF09C'}
                 </Text>
               </Pressable>
               <Pressable
@@ -184,7 +184,7 @@ export default function VaultDetailScreen() {
               text={`${secret.shamirConfig.threshold} of ${secret.shamirConfig.totalShares} shares`}
               variant="dark"
             />
-            {isLocked && <NeoBadge text="LOCKED" variant="outline" />}
+            {isLocked && <NeoBadge text={'\uF023 LOCKED'} variant="outline" />}
           </View>
 
           <View style={styles.detailsGrid}>
@@ -286,6 +286,11 @@ const styles = StyleSheet.create({
   headerBtnText: {
     fontFamily: NEO.fontUIBold,
     fontSize: 13,
+    color: NEO.text,
+  },
+  lockIcon: {
+    fontFamily: NEO.fontIcon,
+    fontSize: 20,
     color: NEO.text,
   },
   secretName: {

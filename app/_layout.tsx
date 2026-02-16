@@ -17,6 +17,8 @@ export default function RootLayout() {
     SpaceGrotesk_400Regular,
     SpaceGrotesk_700Bold,
     SpaceMono_400Regular,
+    IosevkaNerdFont: require('../assets/fonts/IosevkaNerdFont-Regular.ttf'),
+    IosevkaNerdFontBold: require('../assets/fonts/IosevkaNerdFont-Bold.ttf'),
   });
 
   React.useEffect(() => {
