@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Pressable,
+  TextInput,
 } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { NeoCard, NeoButton, NeoBadge } from '../../../components/neo';
 import { MnemonicGrid } from '../../../components/MnemonicGrid';
 import { AddressRow } from '../../../components/AddressRow';
@@ -15,7 +17,6 @@ import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { useVault } from '../../../hooks/useVault';
 import { DERIVATION_PATHS } from '../../../constants/derivation';
-import { SecretRecord } from '../../../constants/types';
 
 function formatDate(ts: number): string {
   const d = new Date(ts);
@@ -32,17 +33,24 @@ function formatDate(ts: number): string {
 export default function VaultDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { highlight } = useTheme();
-  const { secrets, loading, remove } = useVault();
+  const { secrets, loading, update, remove } = useVault();
   const [mnemonicRevealed, setMnemonicRevealed] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
 
-  const secret: SecretRecord | undefined = secrets.find((s) => s.id === id);
+  const secret = secrets.find((s) => s.id === id);
+  const isLocked = secret?.locked ?? false;
 
   const handleDelete = useCallback(() => {
     if (!secret) return;
+    if (isLocked) {
+      Alert.alert('Locked', 'Unlock this secret before deleting.');
+      return;
+    }
     Alert.alert(
       'Delete Secret',
-      `Are you sure you want to permanently delete "${secret.name}"? This action cannot be undone.`,
+      `Permanently delete "${secret.name}"? This cannot be undone.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -53,7 +61,7 @@ export default function VaultDetailScreen() {
             try {
               await remove(secret.id);
               router.back();
-            } catch (err) {
+            } catch {
               Alert.alert('Error', 'Failed to delete secret.');
               setDeleting(false);
             }
@@ -61,7 +69,27 @@ export default function VaultDetailScreen() {
         },
       ]
     );
-  }, [secret, remove]);
+  }, [secret, isLocked, remove]);
+
+  const handleToggleLock = useCallback(async () => {
+    if (!secret) return;
+    await update(secret.id, { locked: !isLocked });
+  }, [secret, isLocked, update]);
+
+  const handleStartEditName = useCallback(() => {
+    if (!secret) return;
+    setEditName(secret.name);
+    setEditingName(true);
+  }, [secret]);
+
+  const handleSaveName = useCallback(async () => {
+    if (!secret) return;
+    const trimmed = editName.trim();
+    if (trimmed.length > 0) {
+      await update(secret.id, { name: trimmed });
+    }
+    setEditingName(false);
+  }, [secret, editName, update]);
 
   if (loading) {
     return (
@@ -99,101 +127,135 @@ export default function VaultDetailScreen() {
   const displayAddresses = secret.addresses.slice(0, 10);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <NeoCard title={secret.name}>
-        <Text style={styles.dateText}>{formatDate(secret.createdAt)}</Text>
-
-        <View style={styles.badgeRow}>
-          <NeoBadge
-            text={`${secret.wordCount} words`}
-            variant="highlight"
-          />
-          <NeoBadge text={pathLabel} variant="outline" />
-          <NeoBadge
-            text={`${secret.shamirConfig.threshold} of ${secret.shamirConfig.totalShares} shares`}
-            variant="dark"
-          />
-        </View>
-
-        <View style={styles.detailsGrid}>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Derivation Path</Text>
-            <Text style={styles.detailValue}>{secret.derivationPath}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Addresses</Text>
-            <Text style={styles.detailValue}>{secret.addressCount}</Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Passphrase</Text>
-            <Text style={styles.detailValue}>
-              {secret.hasPassphrase ? 'Yes' : 'No'}
-            </Text>
-          </View>
-          <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>PIN Protected</Text>
-            <Text style={styles.detailValue}>
-              {secret.hasPIN ? 'Yes' : 'No'}
-            </Text>
-          </View>
-        </View>
-      </NeoCard>
-
-      {/* Mnemonic */}
-      <NeoCard title="Seed Phrase" style={styles.section}>
-        <View style={styles.warningBox}>
-          <Text style={styles.warningText}>
-            SENSITIVE DATA -- Never share your seed phrase with anyone.
-          </Text>
-        </View>
-        <MnemonicGrid
-          words={words}
-          revealed={mnemonicRevealed}
-          onToggleReveal={() => setMnemonicRevealed(!mnemonicRevealed)}
-        />
-      </NeoCard>
-
-      {/* Addresses */}
-      <NeoCard title="Derived Addresses" style={styles.section}>
-        {displayAddresses.length === 0 ? (
-          <Text style={styles.bodyText}>No addresses derived.</Text>
-        ) : (
-          <>
-            {displayAddresses.map((addr) => (
-              <AddressRow key={addr.index} address={addr} />
-            ))}
-            {secret.addresses.length > 10 && (
-              <Text style={styles.moreText}>
-                + {secret.addresses.length - 10} more addresses
-              </Text>
-            )}
-          </>
-        )}
-      </NeoCard>
-
-      {/* Metadata */}
-      {secret.metadata && Object.keys(secret.metadata).length > 0 && (
-        <NeoCard title="Metadata" style={styles.section}>
-          {Object.entries(secret.metadata).map(([key, value]) => (
-            <View key={key} style={styles.metaEntryRow}>
-              <Text style={styles.metaKey}>{key}</Text>
-              <Text style={styles.metaVal}>{value}</Text>
+    <>
+      <Stack.Screen
+        options={{
+          title: secret.name,
+          headerRight: () => (
+            <View style={styles.headerActions}>
+              <Pressable onPress={handleToggleLock} style={styles.headerBtn}>
+                <Text style={styles.headerBtnText}>
+                  {isLocked ? '[LOCKED]' : '[UNLOCKED]'}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handleDelete}
+                style={styles.headerBtn}
+                disabled={deleting}
+              >
+                <Text style={[styles.headerBtnText, { color: isLocked ? '#CCC' : '#CC0000' }]}>
+                  X
+                </Text>
+              </Pressable>
             </View>
-          ))}
-        </NeoCard>
-      )}
+          ),
+        }}
+      />
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        {/* Name (tappable to edit) */}
+        <NeoCard showHeader={false}>
+          {editingName ? (
+            <View style={styles.editNameRow}>
+              <TextInput
+                style={styles.editNameInput}
+                value={editName}
+                onChangeText={setEditName}
+                autoFocus
+                onSubmitEditing={handleSaveName}
+                returnKeyType="done"
+              />
+              <NeoButton title="Save" size="sm" onPress={handleSaveName} />
+            </View>
+          ) : (
+            <Pressable onPress={handleStartEditName}>
+              <Text style={styles.secretName}>{secret.name}</Text>
+              <Text style={styles.editHint}>Tap to rename</Text>
+            </Pressable>
+          )}
+          <Text style={styles.dateText}>{formatDate(secret.createdAt)}</Text>
 
-      {/* Delete */}
-      <View style={styles.dangerSection}>
-        <NeoButton
-          title={deleting ? 'Deleting...' : 'Delete Secret'}
-          variant="danger"
-          onPress={handleDelete}
-          disabled={deleting}
-        />
-      </View>
-    </ScrollView>
+          <View style={styles.badgeRow}>
+            <NeoBadge
+              text={`${secret.wordCount} words`}
+              variant="highlight"
+            />
+            <NeoBadge text={pathLabel} variant="outline" />
+            <NeoBadge
+              text={`${secret.shamirConfig.threshold} of ${secret.shamirConfig.totalShares} shares`}
+              variant="dark"
+            />
+            {isLocked && <NeoBadge text="LOCKED" variant="outline" />}
+          </View>
+
+          <View style={styles.detailsGrid}>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Derivation Path</Text>
+              <Text style={styles.detailValue}>{secret.derivationPath}</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Addresses</Text>
+              <Text style={styles.detailValue}>{secret.addressCount}</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>Passphrase</Text>
+              <Text style={styles.detailValue}>
+                {secret.hasPassphrase ? 'Yes' : 'No'}
+              </Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>PIN Protected</Text>
+              <Text style={styles.detailValue}>
+                {secret.hasPIN ? 'Yes' : 'No'}
+              </Text>
+            </View>
+          </View>
+        </NeoCard>
+
+        {/* Mnemonic */}
+        <NeoCard title="Seed Phrase" style={styles.section}>
+          <View style={styles.warningBox}>
+            <Text style={styles.warningText}>
+              SENSITIVE DATA -- Never share your seed phrase with anyone.
+            </Text>
+          </View>
+          <MnemonicGrid
+            words={words}
+            revealed={mnemonicRevealed}
+            onToggleReveal={() => setMnemonicRevealed(!mnemonicRevealed)}
+          />
+        </NeoCard>
+
+        {/* Addresses */}
+        <NeoCard title="Derived Addresses" style={styles.section}>
+          {displayAddresses.length === 0 ? (
+            <Text style={styles.bodyText}>No addresses derived.</Text>
+          ) : (
+            <>
+              {displayAddresses.map((addr) => (
+                <AddressRow key={addr.index} address={addr} />
+              ))}
+              {secret.addresses.length > 10 && (
+                <Text style={styles.moreText}>
+                  + {secret.addresses.length - 10} more addresses
+                </Text>
+              )}
+            </>
+          )}
+        </NeoCard>
+
+        {/* Metadata */}
+        {secret.metadata && Object.keys(secret.metadata).length > 0 && (
+          <NeoCard title="Metadata" style={styles.section}>
+            {Object.entries(secret.metadata).map(([key, value]) => (
+              <View key={key} style={styles.metaEntryRow}>
+                <Text style={styles.metaKey}>{key}</Text>
+                <Text style={styles.metaVal}>{value}</Text>
+              </View>
+            ))}
+          </NeoCard>
+        )}
+      </ScrollView>
+    </>
   );
 }
 
@@ -213,14 +275,55 @@ const styles = StyleSheet.create({
     marginTop: 12,
     textTransform: 'uppercase',
   },
-  section: {
-    marginTop: 16,
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerBtn: {
+    padding: 4,
+  },
+  headerBtnText: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 13,
+    color: NEO.text,
+  },
+  secretName: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 20,
+    color: NEO.text,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  editHint: {
+    fontFamily: NEO.fontUI,
+    fontSize: 11,
+    color: '#BBB',
+    marginBottom: 4,
+  },
+  editNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  editNameInput: {
+    flex: 1,
+    fontFamily: NEO.fontUIBold,
+    fontSize: 18,
+    color: NEO.text,
+    borderWidth: 2,
+    borderColor: NEO.border,
+    padding: 8,
   },
   dateText: {
-    fontFamily: NEO.fontUI,
-    fontSize: 13,
+    fontFamily: NEO.fontMono,
+    fontSize: 12,
     color: '#999',
     marginBottom: 12,
+  },
+  section: {
+    marginTop: 16,
   },
   badgeRow: {
     flexDirection: 'row',
@@ -293,11 +396,5 @@ const styles = StyleSheet.create({
     fontFamily: NEO.fontMono,
     fontSize: 13,
     color: NEO.text,
-  },
-  dangerSection: {
-    marginTop: 32,
-    paddingTop: 16,
-    borderTopWidth: 2,
-    borderTopColor: '#FF6B6B',
   },
 });

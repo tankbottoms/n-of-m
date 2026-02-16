@@ -26,6 +26,7 @@ export interface SecretRecord {
   metadata?: Record<string, string>;
   hasPassphrase: boolean;
   hasPIN: boolean;
+  locked?: boolean;
 }
 
 export interface SharePayload {

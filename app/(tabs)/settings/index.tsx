@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   Pressable,
+  Switch,
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -13,6 +14,8 @@ import { NeoCard, NeoButton, NeoInput, NeoBadge } from '../../../components/neo'
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { setPIN, hasPIN } from '../../../lib/storage/keys';
+
+const VAULT_AUTH_KEY = 'shamir_vault_auth_required';
 import {
   DEFAULT_WORD_COUNT,
   DEFAULT_ADDRESS_COUNT,
@@ -39,6 +42,9 @@ export default function SettingsScreen() {
   const [pin2, setPin2] = useState('');
   const [pinError, setPinError] = useState('');
 
+  // Vault auth state
+  const [vaultAuthRequired, setVaultAuthRequired] = useState(false);
+
   // Defaults state
   const [wordCount, setWordCount] = useState<WordCount>(DEFAULT_WORD_COUNT);
   const [addressCount, setAddressCount] = useState(DEFAULT_ADDRESS_COUNT);
@@ -46,6 +52,9 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     hasPIN().then(setPinSet);
+    SecureStore.getItemAsync(VAULT_AUTH_KEY).then((v) => {
+      setVaultAuthRequired(v === 'true');
+    });
     SecureStore.getItemAsync(STORE_WORD_COUNT).then((v) => {
       if (v) setWordCount(Number(v) as WordCount);
     });
@@ -170,6 +179,34 @@ export default function SettingsScreen() {
             </View>
           </View>
         )}
+      </NeoCard>
+
+      {/* Vault Authentication */}
+      <NeoCard title="Vault Access" style={styles.section}>
+        <View style={styles.toggleAuthRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bodyText}>Require PIN / FaceID</Text>
+            <Text style={styles.authHint}>
+              {pinSet
+                ? 'Authenticate with PIN or biometrics to view vault'
+                : 'Set a PIN first to enable vault protection'}
+            </Text>
+          </View>
+          <Switch
+            value={vaultAuthRequired}
+            onValueChange={async (val) => {
+              if (val && !pinSet) {
+                Alert.alert('PIN Required', 'Set a PIN first before enabling vault authentication.');
+                return;
+              }
+              setVaultAuthRequired(val);
+              await SecureStore.setItemAsync(VAULT_AUTH_KEY, val ? 'true' : 'false');
+            }}
+            trackColor={{ false: '#DDD', true: highlight }}
+            thumbColor={NEO.bg}
+            disabled={!pinSet}
+          />
+        </View>
       </NeoCard>
 
       {/* Defaults Section */}
@@ -300,6 +337,18 @@ const styles = StyleSheet.create({
   pinStatus: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  toggleAuthRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  authHint: {
+    fontFamily: NEO.fontUI,
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+    lineHeight: 16,
   },
   pinForm: {
     marginTop: 16,

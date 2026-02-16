@@ -46,6 +46,15 @@ export async function saveSecret(record: SecretRecord): Promise<void> {
   await writeVault(records);
 }
 
+export async function updateSecret(id: string, updates: Partial<SecretRecord>): Promise<void> {
+  const records = await readVault();
+  const idx = records.findIndex((r) => r.id === id);
+  if (idx >= 0) {
+    records[idx] = { ...records[idx], ...updates };
+    await writeVault(records);
+  }
+}
+
 export async function deleteSecret(id: string): Promise<void> {
   const records = await readVault();
   await writeVault(records.filter((r) => r.id !== id));

@@ -10,6 +10,12 @@ import { useVault } from '../../../hooks/useVault';
 import { SecretRecord } from '../../../constants/types';
 import { v4 as uuid } from 'uuid';
 
+function timestampName(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
 export default function ShareScreen() {
   const { highlight } = useTheme();
   const { state, reset } = useGenerateFlow();
@@ -35,7 +41,7 @@ export default function ShareScreen() {
     try {
       const record: SecretRecord = {
         id: uuid(),
-        name: name || 'Untitled',
+        name: name || timestampName(),
         createdAt: Date.now(),
         mnemonic,
         wordCount,

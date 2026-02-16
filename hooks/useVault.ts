@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SecretRecord } from '../constants/types';
-import { getAllSecrets, saveSecret, deleteSecret } from '../lib/storage/vault';
+import { getAllSecrets, saveSecret, updateSecret, deleteSecret } from '../lib/storage/vault';
 
 export function useVault() {
   const [secrets, setSecrets] = useState<SecretRecord[]>([]);
@@ -25,6 +25,14 @@ export function useVault() {
     [refresh]
   );
 
+  const update = useCallback(
+    async (id: string, updates: Partial<SecretRecord>) => {
+      await updateSecret(id, updates);
+      await refresh();
+    },
+    [refresh]
+  );
+
   const remove = useCallback(
     async (id: string) => {
       await deleteSecret(id);
@@ -33,5 +41,5 @@ export function useVault() {
     [refresh]
   );
 
-  return { secrets, loading, refresh, save, remove };
+  return { secrets, loading, refresh, save, update, remove };
 }
