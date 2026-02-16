@@ -20,6 +20,7 @@ export default function ScanScreen() {
   const [scanning, setScanning] = useState(false);
   const lastScannedRef = useRef<string>('');
   const cooldownRef = useRef(false);
+  const navigatedRef = useRef(false);
 
   const handleBarCodeScanned = useCallback(({ data }: { data: string }) => {
     // Prevent duplicate scans with cooldown
@@ -37,12 +38,16 @@ export default function ScanScreen() {
     }, 1500);
   }, [scanner]);
 
-  // Navigate when state transitions
+  // Navigate when state transitions (once only)
   useEffect(() => {
+    if (navigatedRef.current) return;
+
     if (scanner.state === 'pin_required') {
+      navigatedRef.current = true;
       update({ shares: scanner.scannedShares });
       router.push('/(tabs)/scan/pin');
     } else if (scanner.state === 'reconstructing') {
+      navigatedRef.current = true;
       update({ shares: scanner.scannedShares });
       router.push('/(tabs)/scan/result');
     }
@@ -52,6 +57,7 @@ export default function ScanScreen() {
     scanner.reset();
     lastScannedRef.current = '';
     cooldownRef.current = false;
+    navigatedRef.current = false;
     setScanning(false);
   }, [scanner]);
 
@@ -144,18 +150,17 @@ export default function ScanScreen() {
             barcodeTypes: ['qr'],
           }}
           onBarcodeScanned={handleBarCodeScanned}
-        >
-          {/* Viewfinder overlay */}
-          <View style={styles.overlay}>
-            <View style={styles.overlayTop} />
-            <View style={styles.overlayMiddle}>
-              <View style={styles.overlaySide} />
-              <View style={[styles.viewfinder, { borderColor: highlight }]} />
-              <View style={styles.overlaySide} />
-            </View>
-            <View style={styles.overlayBottom} />
+        />
+        {/* Viewfinder overlay - positioned above camera */}
+        <View style={styles.overlay} pointerEvents="none">
+          <View style={styles.overlayTop} />
+          <View style={styles.overlayMiddle}>
+            <View style={styles.overlaySide} />
+            <View style={[styles.viewfinder, { borderColor: highlight }]} />
+            <View style={styles.overlaySide} />
           </View>
-        </CameraView>
+          <View style={styles.overlayBottom} />
+        </View>
       </View>
 
       {/* Error display */}
@@ -222,12 +227,13 @@ const styles = StyleSheet.create({
   },
   cameraContainer: {
     flex: 1,
+    position: 'relative',
   },
   camera: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
   },
   overlay: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
   },
   overlayTop: {
     flex: 1,
