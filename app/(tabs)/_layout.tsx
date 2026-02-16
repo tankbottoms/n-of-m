@@ -1,27 +1,67 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../hooks/useTheme';
 import { NEO, SHADOW } from '../../constants/theme';
+import Constants from 'expo-constants';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-function TabButton({ label, focused }: { label: string; focused: boolean }) {
+const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
+
+const TAB_LABELS: Record<string, string> = {
+  index: 'Home',
+  generate: 'Generate',
+  scan: 'Scan',
+  vault: 'Vault',
+  settings: 'Settings',
+};
+
+function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { highlight } = useTheme();
+  const insets = useSafeAreaInsets();
+
   return (
-    <View
-      style={[
-        styles.tabButton,
-        focused && { backgroundColor: highlight, ...SHADOW },
-        !focused && styles.tabButtonInactive,
-      ]}
-    >
-      <Text
-        style={[
-          styles.tabButtonText,
-          !focused && { color: '#999' },
-        ]}
-      >
-        {label}
-      </Text>
+    <View style={[styles.tabBarContainer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+      <View style={styles.buttonRow}>
+        {state.routes.map((route, index) => {
+          const focused = state.index === index;
+          const label = TAB_LABELS[route.name] || route.name;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!focused && !event.defaultPrevented) {
+              navigation.navigate(route.name, route.params);
+            }
+          };
+
+          return (
+            <Pressable
+              key={route.key}
+              onPress={onPress}
+              style={[
+                styles.tabButton,
+                focused && { backgroundColor: highlight, ...SHADOW },
+                !focused && styles.tabButtonInactive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.tabButtonText,
+                  !focused && { color: '#999' },
+                ]}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <Text style={styles.versionText}>v{APP_VERSION}</Text>
     </View>
   );
 }
@@ -29,6 +69,7 @@ function TabButton({ label, focused }: { label: string; focused: boolean }) {
 export default function TabLayout() {
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerStyle: {
           backgroundColor: NEO.bg,
@@ -41,74 +82,41 @@ export default function TabLayout() {
           color: NEO.text,
           textTransform: 'uppercase' as const,
         },
-        tabBarStyle: {
-          backgroundColor: NEO.bg,
-          borderTopWidth: NEO.borderWidth,
-          borderTopColor: NEO.border,
-          height: 72,
-          paddingBottom: 14,
-          paddingTop: 10,
-          paddingHorizontal: 4,
-        },
-        tabBarShowLabel: false,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ focused }) => <TabButton label="Home" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="generate"
-        options={{
-          title: 'Generate',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => <TabButton label="New" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="scan"
-        options={{
-          title: 'Scan',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => <TabButton label="Scan" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="vault"
-        options={{
-          title: 'Vault',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => <TabButton label="Vault" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => <TabButton label="Set" focused={focused} />,
-        }}
-      />
+      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      <Tabs.Screen name="generate" options={{ title: 'Generate', headerShown: false }} />
+      <Tabs.Screen name="scan" options={{ title: 'Scan', headerShown: false }} />
+      <Tabs.Screen name="vault" options={{ title: 'Vault', headerShown: false }} />
+      <Tabs.Screen name="settings" options={{ title: 'Settings', headerShown: false }} />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
+  tabBarContainer: {
+    backgroundColor: NEO.bg,
+    borderTopWidth: NEO.borderWidth,
+    borderTopColor: NEO.border,
+    paddingTop: 10,
+    paddingHorizontal: 16,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 0,
+  },
   tabButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    flex: 1,
+    paddingVertical: 10,
     borderWidth: NEO.borderWidth,
     borderColor: NEO.border,
     backgroundColor: NEO.bg,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 48,
+    marginHorizontal: -NEO.borderWidth / 2,
   },
   tabButtonInactive: {
-    borderColor: '#CCC',
+    borderColor: '#DDD',
   },
   tabButtonText: {
     fontFamily: NEO.fontUIBold,
@@ -116,5 +124,12 @@ const styles = StyleSheet.create({
     color: NEO.text,
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  versionText: {
+    fontFamily: NEO.fontMono,
+    fontSize: 10,
+    color: '#BBB',
+    textAlign: 'center',
+    marginTop: 6,
   },
 });
