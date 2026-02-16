@@ -1,19 +1,12 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Text, View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
 import { NEO } from '../../constants/theme';
 
-function TabIcon({ name, focused }: { name: string; focused: boolean }) {
-  const { highlight } = useTheme();
-  return (
-    <View style={[styles.tabIcon, focused && { backgroundColor: highlight }]}>
-      <Text style={styles.tabIconText}>{name}</Text>
-    </View>
-  );
-}
-
 export default function TabLayout() {
+  const { highlight } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
@@ -32,16 +25,18 @@ export default function TabLayout() {
           backgroundColor: NEO.bg,
           borderTopWidth: NEO.borderWidth,
           borderTopColor: NEO.border,
-          height: 80,
-          paddingBottom: 20,
+          height: 64,
+          paddingBottom: 10,
+          paddingTop: 8,
         },
         tabBarLabelStyle: {
           fontFamily: NEO.fontUIBold,
-          fontSize: 11,
+          fontSize: 12,
           textTransform: 'uppercase' as const,
-          letterSpacing: 0.5,
+          letterSpacing: 1,
         },
-        tabBarActiveTintColor: NEO.text,
+        tabBarIconStyle: { display: 'none' },
+        tabBarActiveTintColor: highlight,
         tabBarInactiveTintColor: '#999',
       }}
     >
@@ -49,7 +44,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ focused }) => <TabIcon name="H" focused={focused} />,
+          tabBarIcon: () => null,
         }}
       />
       <Tabs.Screen
@@ -57,7 +52,7 @@ export default function TabLayout() {
         options={{
           title: 'Generate',
           headerShown: false,
-          tabBarIcon: ({ focused }) => <TabIcon name="G" focused={focused} />,
+          tabBarIcon: () => null,
         }}
       />
       <Tabs.Screen
@@ -65,7 +60,7 @@ export default function TabLayout() {
         options={{
           title: 'Scan',
           headerShown: false,
-          tabBarIcon: ({ focused }) => <TabIcon name="S" focused={focused} />,
+          tabBarIcon: () => null,
         }}
       />
       <Tabs.Screen
@@ -73,7 +68,7 @@ export default function TabLayout() {
         options={{
           title: 'Vault',
           headerShown: false,
-          tabBarIcon: ({ focused }) => <TabIcon name="V" focused={focused} />,
+          tabBarIcon: () => null,
         }}
       />
       <Tabs.Screen
@@ -81,25 +76,9 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           headerShown: false,
-          tabBarIcon: ({ focused }) => <TabIcon name="*" focused={focused} />,
+          tabBarIcon: () => null,
         }}
       />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  tabIcon: {
-    width: 32,
-    height: 32,
-    borderWidth: 2,
-    borderColor: NEO.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabIconText: {
-    fontFamily: NEO.fontUIBold,
-    fontSize: 14,
-    color: NEO.text,
-  },
-});

@@ -1,8 +1,11 @@
 import React from 'react';
-import { Text, ScrollView, StyleSheet } from 'react-native';
+import { Text, ScrollView, View, StyleSheet } from 'react-native';
 import { NeoCard, NeoButton } from '../../components/neo';
 import { NEO } from '../../constants/theme';
 import { router } from 'expo-router';
+import Constants from 'expo-constants';
+
+const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function HomeScreen() {
   return (
@@ -41,13 +44,17 @@ export default function HomeScreen() {
           locations for redundancy and security.
         </Text>
       </NeoCard>
+
+      <View style={styles.versionContainer}>
+        <Text style={styles.versionText}>v{APP_VERSION}</Text>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: NEO.bg },
-  content: { padding: 16, paddingTop: 60 },
+  content: { padding: 16, paddingTop: 60, paddingBottom: 40 },
   title: {
     fontFamily: NEO.fontUIBold,
     fontSize: 36,
@@ -70,5 +77,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: NEO.text,
     lineHeight: 22,
+  },
+  versionContainer: {
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  versionText: {
+    fontFamily: NEO.fontMono,
+    fontSize: 12,
+    color: '#999',
+    letterSpacing: 1,
   },
 });

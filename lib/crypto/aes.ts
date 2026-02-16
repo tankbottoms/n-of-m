@@ -1,44 +1,24 @@
+import { gcm } from '@noble/ciphers/aes';
+import { randomBytes } from '@noble/ciphers/utils';
+
 export async function encrypt(plaintext: string, keyHex: string): Promise<string> {
-  const iv = new Uint8Array(12);
-  crypto.getRandomValues(iv);
-
+  const nonce = randomBytes(12);
   const keyBytes = hexToBytes(keyHex.slice(0, 64));
-  const key = await crypto.subtle.importKey(
-    'raw',
-    keyBytes.buffer as ArrayBuffer,
-    { name: 'AES-GCM' },
-    false,
-    ['encrypt']
-  );
-
   const encoded = new TextEncoder().encode(plaintext);
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv },
-    key,
-    encoded.buffer as ArrayBuffer
-  );
 
-  return bytesToHex(iv) + bytesToHex(new Uint8Array(ciphertext));
+  const cipher = gcm(keyBytes, nonce);
+  const ciphertext = cipher.encrypt(encoded);
+
+  return bytesToHex(nonce) + bytesToHex(ciphertext);
 }
 
 export async function decrypt(encrypted: string, keyHex: string): Promise<string> {
-  const iv = hexToBytes(encrypted.slice(0, 24));
+  const nonce = hexToBytes(encrypted.slice(0, 24));
   const ciphertext = hexToBytes(encrypted.slice(24));
-
   const keyBytes = hexToBytes(keyHex.slice(0, 64));
-  const key = await crypto.subtle.importKey(
-    'raw',
-    keyBytes.buffer as ArrayBuffer,
-    { name: 'AES-GCM' },
-    false,
-    ['decrypt']
-  );
 
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: iv.buffer as ArrayBuffer },
-    key,
-    ciphertext.buffer as ArrayBuffer
-  );
+  const cipher = gcm(keyBytes, nonce);
+  const decrypted = cipher.decrypt(ciphertext);
 
   return new TextDecoder().decode(decrypted);
 }
