@@ -1,12 +1,32 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
-import { NEO } from '../../constants/theme';
+import { NEO, SHADOW } from '../../constants/theme';
+
+function TabButton({ label, focused }: { label: string; focused: boolean }) {
+  const { highlight } = useTheme();
+  return (
+    <View
+      style={[
+        styles.tabButton,
+        focused && { backgroundColor: highlight, ...SHADOW },
+        !focused && styles.tabButtonInactive,
+      ]}
+    >
+      <Text
+        style={[
+          styles.tabButtonText,
+          !focused && { color: '#999' },
+        ]}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
 
 export default function TabLayout() {
-  const { highlight } = useTheme();
-
   return (
     <Tabs
       screenOptions={{
@@ -25,26 +45,19 @@ export default function TabLayout() {
           backgroundColor: NEO.bg,
           borderTopWidth: NEO.borderWidth,
           borderTopColor: NEO.border,
-          height: 64,
-          paddingBottom: 10,
-          paddingTop: 8,
+          height: 72,
+          paddingBottom: 14,
+          paddingTop: 10,
+          paddingHorizontal: 4,
         },
-        tabBarLabelStyle: {
-          fontFamily: NEO.fontUIBold,
-          fontSize: 12,
-          textTransform: 'uppercase' as const,
-          letterSpacing: 1,
-        },
-        tabBarIconStyle: { display: 'none' },
-        tabBarActiveTintColor: highlight,
-        tabBarInactiveTintColor: '#999',
+        tabBarShowLabel: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: () => null,
+          tabBarIcon: ({ focused }) => <TabButton label="Home" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -52,7 +65,7 @@ export default function TabLayout() {
         options={{
           title: 'Generate',
           headerShown: false,
-          tabBarIcon: () => null,
+          tabBarIcon: ({ focused }) => <TabButton label="New" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -60,7 +73,7 @@ export default function TabLayout() {
         options={{
           title: 'Scan',
           headerShown: false,
-          tabBarIcon: () => null,
+          tabBarIcon: ({ focused }) => <TabButton label="Scan" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -68,7 +81,7 @@ export default function TabLayout() {
         options={{
           title: 'Vault',
           headerShown: false,
-          tabBarIcon: () => null,
+          tabBarIcon: ({ focused }) => <TabButton label="Vault" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -76,9 +89,32 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           headerShown: false,
-          tabBarIcon: () => null,
+          tabBarIcon: ({ focused }) => <TabButton label="Set" focused={focused} />,
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: NEO.borderWidth,
+    borderColor: NEO.border,
+    backgroundColor: NEO.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 48,
+  },
+  tabButtonInactive: {
+    borderColor: '#CCC',
+  },
+  tabButtonText: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 11,
+    color: NEO.text,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+});
