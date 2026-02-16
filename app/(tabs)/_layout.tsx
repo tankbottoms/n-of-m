@@ -22,7 +22,8 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.tabBarContainer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+    <View style={[styles.tabBarOuter, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+      {/* Buttons sit above the border line */}
       <View style={styles.buttonRow}>
         {state.routes.map((route, index) => {
           const focused = state.index === index;
@@ -61,6 +62,9 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           );
         })}
       </View>
+      {/* Border line below buttons */}
+      <View style={styles.separator} />
+      {/* Version below the line */}
       <Text style={styles.versionText}>v{APP_VERSION}</Text>
     </View>
   );
@@ -94,16 +98,14 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  tabBarContainer: {
+  tabBarOuter: {
     backgroundColor: NEO.bg,
-    borderTopWidth: NEO.borderWidth,
-    borderTopColor: NEO.border,
-    paddingTop: 10,
     paddingHorizontal: 16,
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 0,
+    gap: 6,
+    paddingVertical: 10,
   },
   tabButton: {
     flex: 1,
@@ -113,7 +115,6 @@ const styles = StyleSheet.create({
     backgroundColor: NEO.bg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: -NEO.borderWidth / 2,
   },
   tabButtonInactive: {
     borderColor: '#DDD',
@@ -124,6 +125,11 @@ const styles = StyleSheet.create({
     color: NEO.text,
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  separator: {
+    height: NEO.borderWidth,
+    backgroundColor: NEO.border,
+    marginHorizontal: -16,
   },
   versionText: {
     fontFamily: NEO.fontMono,
