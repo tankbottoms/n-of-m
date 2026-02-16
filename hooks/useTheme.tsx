@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 const HIGHLIGHT_KEY = 'shamir_highlight_color';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [highlight, setHighlightState] = useState(NEO.defaultHighlight);
+  const [highlight, setHighlightState] = useState<string>(NEO.defaultHighlight);
 
   const setHighlight = useCallback(async (color: string) => {
     setHighlightState(color);

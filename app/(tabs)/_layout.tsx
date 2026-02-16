@@ -1,59 +1,105 @@
 import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Tabs } from 'expo-router';
+import { Text, View, StyleSheet } from 'react-native';
+import { useTheme } from '../../hooks/useTheme';
+import { NEO } from '../../constants/theme';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+function TabIcon({ name, focused }: { name: string; focused: boolean }) {
+  const { highlight } = useTheme();
+  return (
+    <View style={[styles.tabIcon, focused && { backgroundColor: highlight }]}>
+      <Text style={styles.tabIconText}>{name}</Text>
+    </View>
+  );
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        headerStyle: {
+          backgroundColor: NEO.bg,
+          borderBottomWidth: NEO.borderWidth,
+          borderBottomColor: NEO.border,
+        },
+        headerTitleStyle: {
+          fontFamily: NEO.fontUIBold,
+          fontSize: 18,
+          color: NEO.text,
+          textTransform: 'uppercase' as const,
+        },
+        tabBarStyle: {
+          backgroundColor: NEO.bg,
+          borderTopWidth: NEO.borderWidth,
+          borderTopColor: NEO.border,
+          height: 80,
+          paddingBottom: 20,
+        },
+        tabBarLabelStyle: {
+          fontFamily: NEO.fontUIBold,
+          fontSize: 11,
+          textTransform: 'uppercase' as const,
+          letterSpacing: 0.5,
+        },
+        tabBarActiveTintColor: NEO.text,
+        tabBarInactiveTintColor: '#999',
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+          title: 'Home',
+          tabBarIcon: ({ focused }) => <TabIcon name="H" focused={focused} />,
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="generate"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Generate',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => <TabIcon name="G" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="scan"
+        options={{
+          title: 'Scan',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => <TabIcon name="S" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="vault"
+        options={{
+          title: 'Vault',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => <TabIcon name="V" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          headerShown: false,
+          tabBarIcon: ({ focused }) => <TabIcon name="*" focused={focused} />,
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabIcon: {
+    width: 32,
+    height: 32,
+    borderWidth: 2,
+    borderColor: NEO.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabIconText: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 14,
+    color: NEO.text,
+  },
+});
