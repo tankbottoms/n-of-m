@@ -4,32 +4,34 @@ import { router } from 'expo-router';
 import { Buffer } from 'buffer';
 import { NeoButton, NeoCard } from '../../../components/neo';
 import { EntropyCanvas } from '../../../components/EntropyCanvas';
-import { NEO, SHADOW } from '../../../constants/theme';
+import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
+import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
 
 type EntropyMode = 'system' | 'finger' | 'combined' | null;
 
 export default function EntropyScreen() {
   const { highlight } = useTheme();
+  const { update } = useGenerateFlow();
   const [mode, setMode] = useState<EntropyMode>(null);
   const [showCanvas, setShowCanvas] = useState(false);
 
   const handleSelect = useCallback((selected: EntropyMode) => {
     setMode(selected);
     if (selected === 'system') {
+      // No extra entropy needed; clear any previous value and proceed
+      update({ entropy: undefined });
       router.push({ pathname: '/(tabs)/generate/mnemonic' });
     } else {
       setShowCanvas(true);
     }
-  }, []);
+  }, [update]);
 
   const handleEntropyReady = useCallback((entropy: Uint8Array) => {
     const encoded = Buffer.from(entropy).toString('base64');
-    router.push({
-      pathname: '/(tabs)/generate/mnemonic',
-      params: { entropy: encoded },
-    });
-  }, []);
+    update({ entropy: encoded });
+    router.push({ pathname: '/(tabs)/generate/mnemonic' });
+  }, [update]);
 
   const options = [
     {

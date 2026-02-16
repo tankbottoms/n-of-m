@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { Buffer } from 'buffer';
 import { NeoButton, NeoCard } from '../../../components/neo';
 import { MnemonicGrid } from '../../../components/MnemonicGrid';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
+import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
 import { generateMnemonic } from '../../../lib/wallet';
 import { WordCount } from '../../../constants/types';
 
@@ -13,9 +14,9 @@ const WORD_COUNTS: WordCount[] = [12, 15, 18, 21, 24];
 
 export default function MnemonicScreen() {
   const { highlight } = useTheme();
-  const params = useLocalSearchParams<{ entropy?: string }>();
+  const { state, update } = useGenerateFlow();
 
-  const [wordCount, setWordCount] = useState<WordCount>(24);
+  const [wordCount, setWordCount] = useState<WordCount>(state.wordCount);
   const [mnemonic, setMnemonic] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(true);
 
@@ -23,22 +24,20 @@ export default function MnemonicScreen() {
 
   const handleGenerate = useCallback(() => {
     let extraEntropy: Uint8Array | undefined;
-    if (params.entropy) {
-      const buf = Buffer.from(params.entropy, 'base64');
+    if (state.entropy) {
+      const buf = Buffer.from(state.entropy, 'base64');
       extraEntropy = new Uint8Array(buf);
     }
     const phrase = generateMnemonic(wordCount, extraEntropy);
     setMnemonic(phrase);
     setRevealed(true);
-  }, [wordCount, params.entropy]);
+  }, [wordCount, state.entropy]);
 
   const handleContinue = useCallback(() => {
     if (!mnemonic) return;
-    router.push({
-      pathname: '/(tabs)/generate/derivation',
-      params: { mnemonic },
-    });
-  }, [mnemonic]);
+    update({ mnemonic, wordCount });
+    router.push({ pathname: '/(tabs)/generate/derivation' });
+  }, [mnemonic, wordCount, update]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>

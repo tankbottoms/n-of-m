@@ -1,20 +1,20 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { NeoButton, NeoCard } from '../../../components/neo';
-import { NEO, SHADOW } from '../../../constants/theme';
+import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
+import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
 
 const MIN_THRESHOLD = 2;
 const MAX_SHARES = 10;
 
 export default function ShamirScreen() {
   const { highlight } = useTheme();
-  const params = useLocalSearchParams<{ mnemonic: string }>();
-  const mnemonic = params.mnemonic ?? '';
+  const { state, update } = useGenerateFlow();
 
-  const [threshold, setThreshold] = useState(3);
-  const [totalShares, setTotalShares] = useState(5);
+  const [threshold, setThreshold] = useState(state.threshold);
+  const [totalShares, setTotalShares] = useState(state.totalShares);
 
   const canDecThreshold = threshold > MIN_THRESHOLD;
   const canIncThreshold = threshold < totalShares;
@@ -22,15 +22,9 @@ export default function ShamirScreen() {
   const canIncShares = totalShares < MAX_SHARES;
 
   const handleContinue = useCallback(() => {
-    router.push({
-      pathname: '/(tabs)/generate/metadata',
-      params: {
-        mnemonic,
-        threshold: String(threshold),
-        totalShares: String(totalShares),
-      },
-    });
-  }, [mnemonic, threshold, totalShares]);
+    update({ threshold, totalShares });
+    router.push({ pathname: '/(tabs)/generate/metadata' });
+  }, [threshold, totalShares, update]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>

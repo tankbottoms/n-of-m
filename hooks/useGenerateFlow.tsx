@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { SharePayload, PathType, WordCount } from '../constants/types';
 
 interface GenerateFlowState {
+  entropy?: string; // base64-encoded extra entropy from finger/camera
   mnemonic: string;
   wordCount: WordCount;
   pathType: PathType;

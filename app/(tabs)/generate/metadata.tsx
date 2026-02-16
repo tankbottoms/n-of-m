@@ -1,54 +1,94 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, Switch } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { View, Text, ScrollView, StyleSheet, Switch, ActivityIndicator } from 'react-native';
+import { router } from 'expo-router';
+import { Buffer } from 'buffer';
+import { v4 as uuid } from 'uuid';
 import { NeoButton, NeoCard, NeoInput } from '../../../components/neo';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
+import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
+import { split } from '../../../lib/shamir';
+import { encrypt, deriveKey } from '../../../lib/crypto';
+import { getBasePath } from '../../../constants/derivation';
+import { SharePayload } from '../../../constants/types';
 
 export default function MetadataScreen() {
   const { highlight } = useTheme();
-  const params = useLocalSearchParams<{
-    mnemonic: string;
-    threshold: string;
-    totalShares: string;
-  }>();
+  const { state, update } = useGenerateFlow();
 
-  const mnemonic = params.mnemonic ?? '';
-  const threshold = parseInt(params.threshold ?? '3', 10);
-  const totalShares = parseInt(params.totalShares ?? '5', 10);
-
-  const [name, setName] = useState('');
-  const [pinEnabled, setPinEnabled] = useState(false);
-  const [pin, setPin] = useState('');
-  const [passphraseEnabled, setPassphraseEnabled] = useState(false);
-  const [passphrase, setPassphrase] = useState('');
+  const [name, setName] = useState(state.name || '');
+  const [pinEnabled, setPinEnabled] = useState(!!state.pin);
+  const [pin, setPin] = useState(state.pin || '');
+  const [passphraseEnabled, setPassphraseEnabled] = useState(!!state.passphrase);
+  const [passphrase, setPassphrase] = useState(state.passphrase || '');
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const nameValid = name.trim().length > 0;
   const pinValid = !pinEnabled || (pin.length >= 4 && pin.length <= 8);
-  const canContinue = nameValid && pinValid;
+  const canContinue = nameValid && pinValid && !generating;
 
-  const handleGenerate = useCallback(() => {
-    // For now, navigate to a future preview screen or back to index
-    // The actual SSS split and SharePayload creation will be wired
-    // in the integration phase.
-    //
-    // Collect all config for eventual use:
-    const config = {
-      mnemonic,
-      threshold,
-      totalShares,
-      name: name.trim(),
-      hasPIN: pinEnabled,
-      pin: pinEnabled ? pin : undefined,
-      hasPassphrase: passphraseEnabled,
-      passphrase: passphraseEnabled ? passphrase : undefined,
-    };
+  const handleGenerate = useCallback(async () => {
+    if (!state.mnemonic) {
+      setError('No mnemonic available. Go back and generate one first.');
+      return;
+    }
 
-    console.log('Generate config:', JSON.stringify(config, null, 2));
+    setGenerating(true);
+    setError(null);
 
-    // Navigate back to generate index for now
-    router.push('/(tabs)/generate/');
-  }, [mnemonic, threshold, totalShares, name, pinEnabled, pin, passphraseEnabled, passphrase]);
+    try {
+      const secretId = uuid();
+      let secretData = state.mnemonic;
+
+      // If PIN enabled, encrypt the mnemonic
+      if (pinEnabled && pin) {
+        const key = await deriveKey(pin, secretId);
+        secretData = await encrypt(state.mnemonic, key);
+      }
+
+      // Split the secret data into shares
+      const secretBuffer = Buffer.from(secretData);
+      const shares = split(secretBuffer, {
+        shares: state.totalShares,
+        threshold: state.threshold,
+      });
+
+      // Build SharePayload for each share
+      const derivationPath = getBasePath(state.pathType, state.customPath);
+      const sharePayloads: SharePayload[] = shares.map((shareBuf, i) => ({
+        v: 1 as const,
+        id: secretId,
+        name: name.trim(),
+        shareIndex: i + 1,
+        totalShares: state.totalShares,
+        threshold: state.threshold,
+        shareData: shareBuf.toString('hex'),
+        derivationPath,
+        pathType: state.pathType,
+        wordCount: state.wordCount,
+        metadata: state.metadata,
+        hasPIN: pinEnabled,
+        hasPassphrase: passphraseEnabled,
+      }));
+
+      // Update flow context
+      update({
+        name: name.trim(),
+        pin: pinEnabled ? pin : undefined,
+        passphrase: passphraseEnabled ? passphrase : undefined,
+        shares: sharePayloads,
+      });
+
+      // Navigate to preview screen
+      router.push('/(tabs)/generate/preview');
+    } catch (err) {
+      console.error('Generate shares error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate shares');
+    } finally {
+      setGenerating(false);
+    }
+  }, [state, name, pinEnabled, pin, passphraseEnabled, passphrase, update]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -131,7 +171,7 @@ export default function MetadataScreen() {
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Shamir</Text>
           <Text style={styles.summaryValue}>
-            {threshold} of {totalShares}
+            {state.threshold} of {state.totalShares}
           </Text>
         </View>
         <View style={styles.summaryRow}>
@@ -148,12 +188,26 @@ export default function MetadataScreen() {
         </View>
       </NeoCard>
 
+      {error && (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
       <NeoButton
-        title="Generate Shares"
+        title={generating ? 'Generating...' : 'Generate Shares'}
         onPress={handleGenerate}
         disabled={!canContinue}
         style={{ marginTop: 24 }}
       />
+
+      {generating && (
+        <ActivityIndicator
+          size="large"
+          color={highlight}
+          style={{ marginTop: 16 }}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -216,5 +270,17 @@ const styles = StyleSheet.create({
     fontFamily: NEO.fontMono,
     fontSize: 14,
     color: NEO.text,
+  },
+  errorBox: {
+    borderWidth: 2,
+    borderColor: '#CC0000',
+    padding: 12,
+    marginTop: 16,
+  },
+  errorText: {
+    fontFamily: NEO.fontUI,
+    fontSize: 14,
+    color: '#CC0000',
+    lineHeight: 20,
   },
 });

@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { NeoButton, NeoCard, NeoInput } from '../../../components/neo';
 import { AddressRow } from '../../../components/AddressRow';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
+import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
 import { deriveAddresses } from '../../../lib/wallet';
 import { DERIVATION_PATHS } from '../../../constants/derivation';
 import { PathType, DerivedAddress } from '../../../constants/types';
@@ -14,12 +15,12 @@ const ADDRESS_COUNTS = [5, 10, 20] as const;
 
 export default function DerivationScreen() {
   const { highlight } = useTheme();
-  const params = useLocalSearchParams<{ mnemonic: string }>();
-  const mnemonic = params.mnemonic ?? '';
+  const { state, update } = useGenerateFlow();
+  const mnemonic = state.mnemonic;
 
-  const [pathType, setPathType] = useState<PathType>('metamask');
-  const [customPath, setCustomPath] = useState("m/44'/60'/0'/0/{index}");
-  const [addressCount, setAddressCount] = useState<number>(5);
+  const [pathType, setPathType] = useState<PathType>(state.pathType);
+  const [customPath, setCustomPath] = useState(state.customPath ?? "m/44'/60'/0'/0/{index}");
+  const [addressCount, setAddressCount] = useState<number>(state.addressCount);
   const [addresses, setAddresses] = useState<DerivedAddress[]>([]);
   const [derived, setDerived] = useState(false);
 
@@ -40,11 +41,13 @@ export default function DerivationScreen() {
   }, [mnemonic, pathType, addressCount, customPath]);
 
   const handleContinue = useCallback(() => {
-    router.push({
-      pathname: '/(tabs)/generate/shamir',
-      params: { mnemonic },
+    update({
+      pathType,
+      customPath: pathType === 'custom' ? customPath : undefined,
+      addressCount,
     });
-  }, [mnemonic]);
+    router.push({ pathname: '/(tabs)/generate/shamir' });
+  }, [pathType, customPath, addressCount, update]);
 
   const currentPathInfo = DERIVATION_PATHS[pathType];
 
