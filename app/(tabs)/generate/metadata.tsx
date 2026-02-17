@@ -10,18 +10,26 @@ import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
 import { split } from '../../../lib/shamir';
 import { encrypt, deriveKey } from '../../../lib/crypto';
 import { getBasePath } from '../../../constants/derivation';
+import { deriveAddresses } from '../../../lib/wallet';
 import { SharePayload } from '../../../constants/types';
+
+function defaultName(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
 
 export default function MetadataScreen() {
   const { highlight } = useTheme();
   const { state, update } = useGenerateFlow();
 
-  const [name, setName] = useState(state.name || '');
+  const [name, setName] = useState(state.name || defaultName());
   const [pinEnabled, setPinEnabled] = useState(!!state.pin);
   const [pin, setPin] = useState(state.pin || '');
   const [passphraseEnabled, setPassphraseEnabled] = useState(!!state.passphrase);
   const [passphrase, setPassphrase] = useState(state.passphrase || '');
   const [generating, setGenerating] = useState(false);
+  const [customNote, setCustomNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const nameValid = name.trim().length > 0;
@@ -54,6 +62,12 @@ export default function MetadataScreen() {
         threshold: state.threshold,
       });
 
+      // Build metadata with optional note
+      const metadata: Record<string, string> = {};
+      if (customNote.trim()) {
+        metadata.note = customNote.trim();
+      }
+
       // Build SharePayload for each share
       const derivationPath = getBasePath(state.pathType, state.customPath);
       const sharePayloads: SharePayload[] = shares.map((shareBuf, i) => ({
@@ -67,10 +81,19 @@ export default function MetadataScreen() {
         derivationPath,
         pathType: state.pathType,
         wordCount: state.wordCount,
-        metadata: state.metadata,
+        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
         hasPIN: pinEnabled,
         hasPassphrase: passphraseEnabled,
       }));
+
+      // Derive first address for card identification
+      const firstAddr = deriveAddresses(
+        state.mnemonic,
+        state.pathType,
+        1,
+        state.customPath,
+        passphraseEnabled ? passphrase : undefined
+      )[0]?.address;
 
       // Update flow context
       update({
@@ -78,17 +101,18 @@ export default function MetadataScreen() {
         pin: pinEnabled ? pin : undefined,
         passphrase: passphraseEnabled ? passphrase : undefined,
         shares: sharePayloads,
+        firstAddress: firstAddr,
       });
 
       // Navigate to preview screen
       router.push('/(tabs)/generate/preview');
     } catch (err) {
-      console.error('Generate shares error:', err);
+      if (__DEV__) console.error('Generate shares error:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate shares');
     } finally {
       setGenerating(false);
     }
-  }, [state, name, pinEnabled, pin, passphraseEnabled, passphrase, update]);
+  }, [state, name, pinEnabled, pin, passphraseEnabled, passphrase, customNote, update]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -163,6 +187,18 @@ export default function MetadataScreen() {
         )}
       </NeoCard>
 
+      <NeoCard title="Card Note" style={{ marginTop: 16 }}>
+        <NeoInput
+          label="Custom Text"
+          value={customNote}
+          onChangeText={setCustomNote}
+          placeholder="Optional note printed on each QR card (e.g. storage location, instructions)"
+          multiline
+          numberOfLines={3}
+          containerStyle={{ marginBottom: 0 }}
+        />
+      </NeoCard>
+
       <NeoCard title="Summary" style={{ marginTop: 16 }}>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Name</Text>
@@ -186,6 +222,14 @@ export default function MetadataScreen() {
             {passphraseEnabled ? 'Enabled' : 'Disabled'}
           </Text>
         </View>
+        {customNote.trim() !== '' && (
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Note</Text>
+            <Text style={[styles.summaryValue, { flex: 1, textAlign: 'right' }]} numberOfLines={2}>
+              {customNote.trim()}
+            </Text>
+          </View>
+        )}
       </NeoCard>
 
       {error && (

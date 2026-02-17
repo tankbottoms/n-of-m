@@ -32,7 +32,7 @@ export default function ShareScreen() {
       await sharePDF(pdfUri);
       setShared(true);
     } catch (err) {
-      console.error('Share error:', err);
+      if (__DEV__) console.error('Share error:', err);
     }
   }, [pdfUri]);
 
@@ -61,7 +61,7 @@ export default function ShareScreen() {
       await save(record);
       setSaved(true);
     } catch (err) {
-      console.error('Save to vault error:', err);
+      if (__DEV__) console.error('Save to vault error:', err);
       setSaveError(err instanceof Error ? err.message : 'Failed to save');
     }
   }, [name, mnemonic, wordCount, pathType, threshold, totalShares, state, save]);

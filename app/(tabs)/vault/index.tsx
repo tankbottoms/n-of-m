@@ -8,8 +8,9 @@ import {
   Pressable,
 } from 'react-native';
 import { router } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { NeoCard, NeoButton, NeoBadge } from '../../../components/neo';
-import { NEO, SHADOW } from '../../../constants/theme';
+import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { useVault } from '../../../hooks/useVault';
 import { DERIVATION_PATHS } from '../../../constants/derivation';
@@ -25,7 +26,13 @@ function formatDate(ts: number): string {
 
 export default function VaultScreen() {
   const { highlight } = useTheme();
-  const { secrets, loading } = useVault();
+  const { secrets, loading, refresh } = useVault();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   if (loading) {
     return (
@@ -78,24 +85,29 @@ export default function VaultScreen() {
             }
           >
             <NeoCard style={styles.secretCard} showHeader={false}>
-              <Text style={styles.secretName}>{secret.name}</Text>
+              <View style={styles.nameRow}>
+                <Text style={[styles.secretName, { flex: 1 }]}>{secret.name}</Text>
+                {secret.locked && (
+                  <NeoBadge text="LOCKED" variant="highlight" />
+                )}
+              </View>
               <Text style={styles.secretDate}>{formatDate(secret.createdAt)}</Text>
 
               <View style={styles.badgeRow}>
                 <NeoBadge
                   text={`${secret.wordCount} words`}
                   variant="highlight"
-                  style={styles.badge}
+
                 />
                 <NeoBadge
                   text={pathLabel}
                   variant="outline"
-                  style={styles.badge}
+
                 />
                 <NeoBadge
                   text={`${secret.shamirConfig.threshold} of ${secret.shamirConfig.totalShares} shares`}
                   variant="dark"
-                  style={styles.badge}
+
                 />
               </View>
 
@@ -169,6 +181,11 @@ const styles = StyleSheet.create({
   secretCard: {
     marginBottom: 16,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   secretName: {
     fontFamily: NEO.fontUIBold,
     fontSize: 18,
@@ -189,7 +206,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
-  badge: {},
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',

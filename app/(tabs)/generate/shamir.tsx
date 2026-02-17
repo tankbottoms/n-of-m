@@ -33,6 +33,15 @@ export default function ShamirScreen() {
         Configure how many shares to create and how many are needed for recovery.
       </Text>
 
+      <NeoCard title="How It Works" style={{ marginBottom: 16 }}>
+        <Text style={styles.desc}>
+          Shamir's Secret Sharing splits your seed phrase into N total shares,
+          of which any M are needed to reconstruct the original. For example,
+          with a 3 of 5 scheme, you create 5 share cards and need any 3 to
+          recover your wallet. The remaining shares reveal nothing about the secret.
+        </Text>
+      </NeoCard>
+
       <NeoCard title="Threshold (M)">
         <Text style={styles.desc}>
           Minimum shares needed to reconstruct the secret.
@@ -93,17 +102,18 @@ export default function ShamirScreen() {
 
       <NeoCard title="Summary" style={{ marginTop: 16 }}>
         <View style={[styles.summaryBox, { borderColor: highlight }]}>
-          <Text style={styles.summaryText}>
-            Any{' '}
-            <Text style={[styles.summaryHighlight, { color: highlight }]}>
-              {threshold}
-            </Text>{' '}
-            of{' '}
-            <Text style={[styles.summaryHighlight, { color: highlight }]}>
-              {totalShares}
-            </Text>{' '}
-            shares needed to recover
-          </Text>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryText}>Any </Text>
+            <View style={[styles.numberBox, { backgroundColor: highlight }]}>
+              <Text style={styles.numberText}>{threshold}</Text>
+            </View>
+            <Text style={styles.summaryText}> of </Text>
+            <View style={[styles.numberBox, { backgroundColor: highlight }]}>
+              <Text style={styles.numberText}>{totalShares}</Text>
+            </View>
+            <Text style={styles.summaryText}> shares</Text>
+          </View>
+          <Text style={[styles.summaryText, { marginTop: 4, textAlign: 'center' }]}>needed to recover</Text>
         </View>
       </NeoCard>
 
@@ -186,8 +196,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
-  summaryHighlight: {
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
+  numberBox: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderWidth: NEO.borderWidth,
+    borderColor: NEO.border,
+    marginHorizontal: 4,
+  },
+  numberText: {
     fontFamily: NEO.fontUIBold,
-    fontSize: 20,
+    fontSize: 22,
+    color: NEO.text,
   },
 });

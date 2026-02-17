@@ -5,6 +5,8 @@ import { NeoCard } from '../../../components/neo';
 import { NEO, SHADOW } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { LAYOUTS, LayoutType } from '../../../lib/pdf/layouts';
+import { generatePDF, sharePDF } from '../../../lib/pdf/generate';
+import { SharePayload } from '../../../constants/types';
 
 const LAYOUT_KEY = 'shamir_default_layout';
 const LAYOUT_OPTIONS: LayoutType[] = ['full-page', '2-up', 'wallet-size'];
@@ -15,9 +17,27 @@ const LAYOUT_ICONS: Record<LayoutType, string[]> = {
   'wallet-size': ['[  ][  ]', '[  ][  ]'],
 };
 
+function makeMockShares(): SharePayload[] {
+  return [1, 2, 3].map((i) => ({
+    v: 1 as const,
+    id: 'preview-demo',
+    name: 'Sample Secret',
+    shareIndex: i,
+    totalShares: 3,
+    threshold: 2,
+    shareData: 'PREVIEW_DEMO_SHARE_DATA_' + i + '_' + 'x'.repeat(60),
+    derivationPath: "m/44'/60'/0'/0/0",
+    pathType: 'metamask' as const,
+    wordCount: 24 as const,
+    hasPIN: false,
+    hasPassphrase: false,
+  }));
+}
+
 export default function LayoutScreen() {
   const { highlight } = useTheme();
   const [selected, setSelected] = useState<LayoutType>('full-page');
+  const [previewing, setPreviewing] = useState<LayoutType | null>(null);
 
   useEffect(() => {
     SecureStore.getItemAsync(LAYOUT_KEY).then((v) => {
@@ -31,6 +51,18 @@ export default function LayoutScreen() {
     setSelected(lt);
     await SecureStore.setItemAsync(LAYOUT_KEY, lt);
   }, []);
+
+  const handlePreview = useCallback(async (lt: LayoutType) => {
+    setPreviewing(lt);
+    try {
+      const shares = makeMockShares();
+      const uri = await generatePDF(shares, highlight, lt);
+      await sharePDF(uri);
+    } catch (err) {
+      if (__DEV__) console.error('Preview error:', err);
+    }
+    setPreviewing(null);
+  }, [highlight]);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -94,6 +126,16 @@ export default function LayoutScreen() {
                   <Text style={styles.selectedText}>✓</Text>
                 </View>
               )}
+
+              <Pressable
+                onPress={() => handlePreview(lt)}
+                style={styles.previewBtn}
+                disabled={previewing !== null}
+              >
+                <Text style={styles.previewIcon}>
+                  {previewing === lt ? '...' : '\uF1C1'}
+                </Text>
+              </Pressable>
             </View>
           </Pressable>
         );
@@ -200,6 +242,15 @@ const styles = StyleSheet.create({
   selectedText: {
     fontWeight: '900',
     fontSize: 16,
+    color: NEO.text,
+  },
+  previewBtn: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  previewIcon: {
+    fontFamily: NEO.fontIcon,
+    fontSize: 22,
     color: NEO.text,
   },
 });

@@ -75,7 +75,7 @@ export default function PinScreen() {
 
       router.replace('/(tabs)/scan/result');
     } catch (err) {
-      console.error('Reconstruction error:', err);
+      if (__DEV__) console.error('Reconstruction error:', err);
       setError(
         err instanceof Error
           ? `Reconstruction failed: ${err.message}`

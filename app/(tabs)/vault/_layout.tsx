@@ -147,7 +147,15 @@ export default function VaultLayout() {
         } as Record<string, unknown>,
         headerBackTitle: 'Back',
       }}
-    />
+    >
+      <Stack.Screen
+        name="index"
+        options={{
+          title: 'VAULT',
+        }}
+      />
+      <Stack.Screen name="[id]" options={{ title: '' }} />
+    </Stack>
   );
 }
 

@@ -100,7 +100,7 @@ export default function ImportScreen() {
           style={{ marginTop: 16 }}
         />
       ) : (
-        <View style={styles.validatedSection}>
+        <View>
           <NeoCard title={`${words.length}-Word Mnemonic`} style={{ marginTop: 16 }}>
             <MnemonicGrid words={words} revealed={true} />
             <View style={[styles.validBadge, { borderColor: highlight }]}>
@@ -173,7 +173,6 @@ const styles = StyleSheet.create({
     color: '#CC0000',
     lineHeight: 20,
   },
-  validatedSection: {},
   validBadge: {
     borderWidth: 2,
     padding: 8,

@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shamir — UX Widget Specification</title>
+<style>
+  :root {
+    --bg: #fff;
+    --text: #000;
+    --border: #000;
+    --highlight: #A8D8EA;
+    --gray: #666;
+    --light-gray: #f5f5f5;
+    --danger: #FF6B6B;
+    --warning: #CC6600;
+    --mono: 'Courier New', Courier, monospace;
+    --ui: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    --border-w: 3px;
+    --shadow-off: 4px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--ui);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+    padding: 40px 24px 80px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* ── Typography ── */
+  h1 {
+    font-size: 32px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    border-bottom: var(--border-w) solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+  }
+  h1 small {
+    display: block;
+    font-size: 13px;
+    font-weight: normal;
+    letter-spacing: 1px;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+  h2 {
+    font-size: 22px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 48px;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background: var(--highlight);
+    border: var(--border-w) solid var(--border);
+    box-shadow: var(--shadow-off) var(--shadow-off) 0 var(--border);
+  }
+  h3 {
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 28px;
+    margin-bottom: 10px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--border);
+  }
+  h4 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gray);
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+  p { margin-bottom: 10px; }
+  code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--light-gray);
+    padding: 1px 5px;
+    border: 1px solid #ddd;
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--light-gray);
+    border: 2px solid var(--border);
+    padding: 12px 16px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  /* ── Cards ── */
+  .spec-card {
+    border: var(--border-w) solid var(--border);
+    box-shadow: var(--shadow-off) var(--shadow-off) 0 var(--border);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .spec-card-header {
+    padding: 10px 16px;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: var(--border-w) solid var(--border);
+    background: var(--light-gray);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .spec-card-header .file-path {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: normal;
+    color: var(--gray);
+  }
+  .spec-card-body { padding: 16px; }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+  th, td {
+    border: 2px solid var(--border);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--light-gray);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  td code { font-size: 12px; }
+
+  /* ── Visual Samples ── */
+  .sample {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--border-w) solid var(--border);
+    box-shadow: var(--shadow-off) var(--shadow-off) 0 var(--border);
+    font-family: var(--ui);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: default;
+  }
+  .sample-btn { padding: 10px 20px; font-size: 14px; }
+  .sample-btn.primary { background: var(--highlight); }
+  .sample-btn.secondary { background: var(--bg); }
+  .sample-btn.danger { background: var(--danger); color: var(--bg); }
+  .sample-badge {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-width: 2px;
+  }
+  .sample-badge.highlight { background: var(--highlight); }
+  .sample-badge.dark { background: var(--text); color: var(--bg); }
+  .sample-badge.outline { background: transparent; }
+  .sample-input {
+    border: var(--border-w) solid var(--border);
+    padding: 10px 14px;
+    font-family: var(--ui);
+    font-size: 15px;
+    outline: none;
+    width: 280px;
+    max-width: 100%;
+  }
+  .sample-input:focus { border-color: var(--highlight); }
+  .sample-input.mono { font-family: var(--mono); }
+
+  .sample-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  /* ── Color Swatches ── */
+  .swatch-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .swatch {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .swatch.selected { border-width: 4px; }
+
+  /* ── Screen Diagrams ── */
+  .screen-diagram {
+    border: 2px solid #ccc;
+    background: var(--light-gray);
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+
+  /* ── Flow Diagrams ── */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .flow-step {
+    padding: 6px 12px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+  .flow-step.active { background: var(--highlight); }
+  .flow-arrow { font-size: 16px; color: var(--gray); }
+
+  /* ── Lists ── */
+  ul, ol { margin-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+
+  /* ── Utility ── */
+  .label {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray);
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+    margin-right: 4px;
+  }
+  .tag.required { border-color: var(--danger); color: var(--danger); }
+  .tag.optional { border-color: var(--gray); color: var(--gray); }
+  .tag.default { border-color: var(--highlight); color: #005f7f; background: #e8f6fc; }
+  .spacer { height: 24px; }
+
+  /* ── TOC ── */
+  .toc {
+    border: var(--border-w) solid var(--border);
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    background: var(--light-gray);
+  }
+  .toc-title {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--gray);
+    margin-bottom: 10px;
+  }
+  .toc a {
+    display: block;
+    color: var(--text);
+    text-decoration: none;
+    padding: 3px 0;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .toc a:hover { color: #005f7f; }
+  .toc .sub { margin-left: 16px; font-weight: normal; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>
+  Shamir
+  <small>UX Widget Specification &mdash; v2.0</small>
+</h1>
+<p>
+  This document describes the user-facing widgets, screens, navigation structure,
+  and interaction patterns of the <strong>Shamir</strong> Ethereum Seed Phrase Manager
+  (React Native / Expo). The app follows a <strong>neobrutalist</strong> design language:
+  bold borders, flat shadows, sharp corners, monospace data, and a single configurable
+  highlight color.
+</p>
+
+<!-- ═══════════════════ TOC ═══════════════════ -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <a href="#design-system">1. Design System</a>
+  <a class="sub" href="#colors">Colors &amp; Palettes</a>
+  <a class="sub" href="#typography">Typography</a>
+  <a class="sub" href="#tokens">Design Tokens</a>
+  <a href="#components">2. Component Library</a>
+  <a class="sub" href="#neo-button">NeoButton</a>
+  <a class="sub" href="#neo-card">NeoCard</a>
+  <a class="sub" href="#neo-input">NeoInput</a>
+  <a class="sub" href="#neo-badge">NeoBadge</a>
+  <a class="sub" href="#qrcodeview">QRCodeView</a>
+  <a class="sub" href="#mnemonicgrid">MnemonicGrid</a>
+  <a class="sub" href="#addressrow">AddressRow</a>
+  <a class="sub" href="#entropycanvas">EntropyCanvas</a>
+  <a class="sub" href="#pathspinner">PathSpinner</a>
+  <a class="sub" href="#colorpicker">ColorPicker</a>
+  <a class="sub" href="#scanprogress">ScanProgress</a>
+  <a href="#navigation">3. Navigation &amp; Tab Bar</a>
+  <a href="#screens">4. Screens</a>
+  <a class="sub" href="#screen-home">Home</a>
+  <a class="sub" href="#screen-generate">Generate Flow</a>
+  <a class="sub" href="#screen-scan">Scan Flow</a>
+  <a class="sub" href="#screen-vault">Vault</a>
+  <a class="sub" href="#screen-settings">Settings</a>
+  <a class="sub" href="#screen-info">Informational</a>
+  <a href="#pdf-cards">5. PDF Share Cards</a>
+  <a href="#data-model">6. Data Model</a>
+  <a href="#state-hooks">7. State Hooks</a>
+  <a href="#user-flows">8. User Flows</a>
+  <a href="#patterns">9. Interaction Patterns</a>
+</div>
+
+
+<!-- ═══════════════════ 1. DESIGN SYSTEM ═══════════════════ -->
+<h2 id="design-system">1. Design System</h2>
+
+<h3 id="colors">Colors &amp; Palettes</h3>
+<p>
+  The app ships three palette groups. Users pick one color as the global
+  <strong>highlight</strong>; it tints headers, active buttons, badges, and focus
+  rings.
+</p>
+
+<h4>Pastels</h4>
+<div class="swatch-row">
+  <div class="swatch selected" style="background:#A8D8EA;">&#10003;</div>
+  <div class="swatch" style="background:#F4B8C1;"></div>
+  <div class="swatch" style="background:#B8E6C8;"></div>
+  <div class="swatch" style="background:#F9E8A0;"></div>
+  <div class="swatch" style="background:#C8B8E6;"></div>
+  <div class="swatch" style="background:#F4C9A8;"></div>
+</div>
+
+<h4>Bold</h4>
+<div class="swatch-row">
+  <div class="swatch" style="background:#0066FF;"></div>
+  <div class="swatch" style="background:#FF0066;"></div>
+  <div class="swatch" style="background:#00FF66;"></div>
+  <div class="swatch" style="background:#FFFF00;"></div>
+</div>
+
+<h4>Muted</h4>
+<div class="swatch-row">
+  <div class="swatch" style="background:#C4A4A4;"></div>
+  <div class="swatch" style="background:#A4C4A4;"></div>
+  <div class="swatch" style="background:#7A8A9A;"></div>
+  <div class="swatch" style="background:#C4A464;"></div>
+</div>
+
+<h4>Semantic Colors</h4>
+<table>
+  <tr><th>Role</th><th>Value</th><th>Usage</th></tr>
+  <tr><td>Background</td><td><code>#FFFFFF</code></td><td>Page, card body, inputs</td></tr>
+  <tr><td>Text</td><td><code>#000000</code></td><td>All body and heading text</td></tr>
+  <tr><td>Border / Shadow</td><td><code>#000000</code></td><td>Borders, box shadows</td></tr>
+  <tr><td>Gray</td><td><code>#666666</code></td><td>Labels, secondary text</td></tr>
+  <tr><td>Light Gray</td><td><code>#F5F5F5</code></td><td>Footers, code backgrounds</td></tr>
+  <tr><td>Danger</td><td><code>#FF6B6B</code></td><td>Delete buttons, danger actions</td></tr>
+  <tr><td>Error</td><td><code>#CC0000</code></td><td>Error messages, private keys</td></tr>
+  <tr><td>Warning</td><td><code>#CC6600</code></td><td>Caution text</td></tr>
+</table>
+
+<h3 id="typography">Typography</h3>
+<table>
+  <tr><th>Token</th><th>Font</th><th>Usage</th></tr>
+  <tr><td><code>fontUI</code></td><td>Space Grotesk 400</td><td>Body text, labels, descriptions</td></tr>
+  <tr><td><code>fontUIBold</code></td><td>Space Grotesk 700</td><td>Headings, buttons, emphasis</td></tr>
+  <tr><td><code>fontMono</code></td><td>Space Mono 400</td><td>Addresses, keys, code, data</td></tr>
+  <tr><td><code>fontIcon</code></td><td>Iosevka Nerd Font</td><td>Lock glyphs, status icons</td></tr>
+  <tr><td><code>fontIconBold</code></td><td>Iosevka Nerd Font Bold</td><td>Emphasized icons</td></tr>
+</table>
+<p>
+  PDF cards use <code>Courier New</code> as a web-safe fallback since custom fonts
+  are not embedded in the HTML-to-PDF pipeline.
+</p>
+
+<h3 id="tokens">Design Tokens (NEO)</h3>
+<table>
+  <tr><th>Token</th><th>Default</th><th>Configurable</th></tr>
+  <tr><td><code>borderWidth</code></td><td>3px</td><td>Yes (1&ndash;5px)</td></tr>
+  <tr><td><code>shadowOffset</code></td><td>4px</td><td>No</td></tr>
+  <tr><td><code>radius</code></td><td>0</td><td>No</td></tr>
+  <tr><td><code>defaultHighlight</code></td><td><code>#A8D8EA</code></td><td>Yes (palette picker)</td></tr>
+</table>
+
+<p>Source: <code>constants/theme.ts</code></p>
+
+
+<!-- ═══════════════════ 2. COMPONENT LIBRARY ═══════════════════ -->
+<h2 id="components">2. Component Library</h2>
+
+<!-- ── NeoButton ── -->
+<h3 id="neo-button">NeoButton</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    NeoButton
+    <span class="file-path">components/neo/Button.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Primary action control. Renders as a <code>Pressable</code> with the neobrutalist
+      shadow treatment. On press the element translates (2, 2) into its own shadow,
+      visually "pushing" it flat.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr>
+      <tr><td><code>title</code></td><td><code>string</code></td><td>&mdash;</td><td><span class="tag required">required</span> Rendered uppercase</td></tr>
+      <tr><td><code>variant</code></td><td><code>'primary' | 'secondary' | 'danger'</code></td><td><code>'primary'</code></td><td>Controls background color</td></tr>
+      <tr><td><code>size</code></td><td><code>'sm' | 'md' | 'lg'</code></td><td><code>'md'</code></td><td>Padding &amp; font scale</td></tr>
+      <tr><td><code>disabled</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Gray bg, no press effect</td></tr>
+      <tr><td><code>style</code></td><td><code>ViewStyle</code></td><td>&mdash;</td><td><span class="tag optional">optional</span></td></tr>
+      <tr><td><code>textStyle</code></td><td><code>TextStyle</code></td><td>&mdash;</td><td><span class="tag optional">optional</span></td></tr>
+    </table>
+
+    <h4>Variants</h4>
+    <div class="sample-row">
+      <div class="sample sample-btn primary">Primary</div>
+      <div class="sample sample-btn secondary">Secondary</div>
+      <div class="sample sample-btn danger">Danger</div>
+      <div class="sample sample-btn secondary" style="opacity:0.5;background:#E0E0E0;">Disabled</div>
+    </div>
+
+    <h4>Size Scale</h4>
+    <table>
+      <tr><th>Size</th><th>Padding (v/h)</th><th>Font</th></tr>
+      <tr><td>sm</td><td>8 / 16</td><td>14px</td></tr>
+      <tr><td>md</td><td>12 / 24</td><td>16px</td></tr>
+      <tr><td>lg</td><td>16 / 32</td><td>18px</td></tr>
+    </table>
+
+    <h4>States</h4>
+    <ul>
+      <li><strong>Default</strong> &mdash; full shadow (4px offset)</li>
+      <li><strong>Pressed</strong> &mdash; shadow reduces to 2px, element translates (2,2)</li>
+      <li><strong>Disabled</strong> &mdash; <code>#E0E0E0</code> background, no press animation</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── NeoCard ── -->
+<h3 id="neo-card">NeoCard</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    NeoCard
+    <span class="file-path">components/neo/Card.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Container for grouping related content. Optional colored header bar.
+      Used throughout the app for sections, forms, and informational panels.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr>
+      <tr><td><code>title</code></td><td><code>string</code></td><td>&mdash;</td><td><span class="tag optional">optional</span> Header text (uppercase)</td></tr>
+      <tr><td><code>children</code></td><td><code>ReactNode</code></td><td>&mdash;</td><td><span class="tag required">required</span></td></tr>
+      <tr><td><code>showHeader</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Toggle header visibility</td></tr>
+      <tr><td><code>style</code></td><td><code>ViewStyle</code></td><td>&mdash;</td><td><span class="tag optional">optional</span></td></tr>
+    </table>
+
+    <h4>Visual</h4>
+    <div class="spec-card" style="max-width:320px;">
+      <div class="spec-card-header" style="background:var(--highlight);">
+        Card Title
+      </div>
+      <div class="spec-card-body">
+        <p style="margin:0;">Card body content with 16px padding on all sides. Border is 3px solid black, sharp corners, 4px shadow.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NeoInput ── -->
+<h3 id="neo-input">NeoInput</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    NeoInput
+    <span class="file-path">components/neo/Input.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Text input with an optional uppercase label. Border color shifts to the
+      highlight on focus.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr>
+      <tr><td><code>label</code></td><td><code>string</code></td><td>&mdash;</td><td><span class="tag optional">optional</span> Uppercase label</td></tr>
+      <tr><td><code>mono</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Switch to monospace font</td></tr>
+      <tr><td><code>containerStyle</code></td><td><code>ViewStyle</code></td><td>&mdash;</td><td><span class="tag optional">optional</span></td></tr>
+      <tr><td colspan="4">Also accepts all <code>TextInputProps</code></td></tr>
+    </table>
+
+    <h4>Visual</h4>
+    <div style="margin-bottom:12px;">
+      <div class="label" style="margin-bottom:4px;">Name</div>
+      <input class="sample-input" type="text" placeholder="e.g. Main Wallet" />
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:4px;">Address</div>
+      <input class="sample-input mono" type="text" value="0x742d35Cc6634C0..." />
+    </div>
+
+    <h4>States</h4>
+    <ul>
+      <li><strong>Unfocused</strong> &mdash; black border</li>
+      <li><strong>Focused</strong> &mdash; highlight-color border</li>
+      <li><strong>Placeholder</strong> &mdash; <code>#999</code> text</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── NeoBadge ── -->
+<h3 id="neo-badge">NeoBadge</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    NeoBadge
+    <span class="file-path">components/neo/Badge.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Inline status indicator for metadata, labels, and state display.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr>
+      <tr><td><code>text</code></td><td><code>string</code></td><td>&mdash;</td><td><span class="tag required">required</span> Uppercase</td></tr>
+      <tr><td><code>variant</code></td><td><code>'highlight' | 'dark' | 'outline'</code></td><td><code>'highlight'</code></td><td>Visual style</td></tr>
+      <tr><td><code>style</code></td><td><code>ViewStyle</code></td><td>&mdash;</td><td><span class="tag optional">optional</span></td></tr>
+    </table>
+
+    <h4>Variants</h4>
+    <div class="sample-row">
+      <span class="sample sample-badge highlight">24 Words</span>
+      <span class="sample sample-badge dark">3 of 5</span>
+      <span class="sample sample-badge outline">MetaMask</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── QRCodeView ── -->
+<h3 id="qrcodeview">QRCodeView</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    QRCodeView
+    <span class="file-path">components/QRCodeView.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Renders a QR code via <code>react-native-qrcode-svg</code> inside a bordered
+      container with 12px internal padding. Black on white.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
+      <tr><td><code>value</code></td><td><code>string</code></td><td>&mdash; <span class="tag required">required</span></td></tr>
+      <tr><td><code>size</code></td><td><code>number</code></td><td><code>200</code></td></tr>
+    </table>
+
+    <h4>Visual</h4>
+    <div style="display:inline-flex;align-items:center;justify-content:center;border:3px solid #000;padding:12px;width:100px;height:100px;margin-bottom:8px;">
+      <svg viewBox="0 0 60 60" width="70" height="70">
+        <rect x="0" y="0" width="20" height="20" fill="#000"/>
+        <rect x="40" y="0" width="20" height="20" fill="#000"/>
+        <rect x="0" y="40" width="20" height="20" fill="#000"/>
+        <rect x="25" y="25" width="10" height="10" fill="#000"/>
+      </svg>
+    </div>
+    <p>Container sizes to <code>size + 24</code> pixels (12px padding each side).</p>
+  </div>
+</div>
+
+<!-- ── MnemonicGrid ── -->
+<h3 id="mnemonicgrid">MnemonicGrid</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    MnemonicGrid
+    <span class="file-path">components/MnemonicGrid.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Displays a BIP39 mnemonic as a numbered grid of word cells. Supports
+      toggling between revealed words and masked (<code>****</code>) state.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
+      <tr><td><code>words</code></td><td><code>string[]</code></td><td>&mdash; <span class="tag required">required</span></td></tr>
+      <tr><td><code>revealed</code></td><td><code>boolean</code></td><td><code>true</code></td></tr>
+      <tr><td><code>onToggleReveal</code></td><td><code>() =&gt; void</code></td><td>&mdash;</td></tr>
+    </table>
+
+    <h4>Visual</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+      <div style="border:2px solid #000;padding:6px 8px;min-width:90px;display:flex;gap:8px;font-size:13px;">
+        <span style="font-family:var(--mono);color:#999;width:20px;">1</span>
+        <span style="font-family:var(--mono);">abandon</span>
+      </div>
+      <div style="border:2px solid #000;padding:6px 8px;min-width:90px;display:flex;gap:8px;font-size:13px;">
+        <span style="font-family:var(--mono);color:#999;width:20px;">2</span>
+        <span style="font-family:var(--mono);">ability</span>
+      </div>
+      <div style="border:2px solid #000;padding:6px 8px;min-width:90px;display:flex;gap:8px;font-size:13px;">
+        <span style="font-family:var(--mono);color:#999;width:20px;">3</span>
+        <span style="font-family:var(--mono);">****</span>
+      </div>
+    </div>
+    <p>Cells flex-wrap at ~30% width (min 100px). Toggle button sits top-right with highlight background.</p>
+  </div>
+</div>
+
+<!-- ── AddressRow ── -->
+<h3 id="addressrow">AddressRow</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    AddressRow
+    <span class="file-path">components/AddressRow.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Displays a derived Ethereum address with copy-to-clipboard, private key
+      reveal/hide, and pin toggle. Tapping the address or key copies it and shows
+      a floating "COPIED" animation that fades upward over 1.2 seconds.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
+      <tr><td><code>address</code></td><td><code>DerivedAddress</code></td><td>&mdash; <span class="tag required">required</span></td></tr>
+      <tr><td><code>pinned</code></td><td><code>boolean</code></td><td><code>false</code></td></tr>
+      <tr><td><code>onTogglePin</code></td><td><code>() =&gt; void</code></td><td>&mdash;</td></tr>
+    </table>
+
+    <h4>Layout</h4>
+<pre>
++---------------------------------------------------+
+| #0                                          [star] |
+| 0x742d35Cc6634C0532925a3b...          [tap=copy]  |
+| 0xprivatekey...                       [tap=copy]  |
+|                                  [ KEY ] / [HIDE] |
++---------------------------------------------------+</pre>
+
+    <h4>Interactions</h4>
+    <ul>
+      <li>Tap address &rarr; copy to clipboard, show "COPIED" float</li>
+      <li>Tap private key &rarr; copy to clipboard, show "COPIED" float</li>
+      <li>Tap KEY button &rarr; reveal private key (red text)</li>
+      <li>Tap HIDE button &rarr; hide private key</li>
+      <li>Tap star &rarr; toggle pin (filled = pinned, outline = unpinned)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── EntropyCanvas ── -->
+<h3 id="entropycanvas">EntropyCanvas</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    EntropyCanvas
+    <span class="file-path">components/EntropyCanvas.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Collects accelerometer data at 20 Hz to supplement system RNG. Displays
+      a progress bar that fills as readings accumulate (default 200 required).
+      On completion the data is hashed with SHA-256 and returned via callback.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
+      <tr><td><code>onEntropyReady</code></td><td><code>(entropy: Uint8Array) =&gt; void</code></td><td>&mdash; <span class="tag required">required</span></td></tr>
+      <tr><td><code>requiredPoints</code></td><td><code>number</code></td><td><code>200</code></td></tr>
+    </table>
+
+    <h4>Visual</h4>
+<pre>
++--------------------------------------------+
+|      MOVE YOUR PHONE AROUND                |
+|   Shake, tilt, or wave your device         |
+|                                            |
+|  [========............] 42%                |
++--------------------------------------------+</pre>
+    <p>200px height, <code>#FAFAFA</code> background, 3px border. Progress bar is 8px tall with highlight fill.</p>
+  </div>
+</div>
+
+<!-- ── PathSpinner ── -->
+<h3 id="pathspinner">PathSpinner</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    PathSpinner
+    <span class="file-path">components/PathSpinner.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Numeric stepper with up/down arrows and a bordered value display. Used for
+      address counts, custom derivation path indices, and similar numeric config.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Default</th></tr>
+      <tr><td><code>value</code></td><td><code>number</code></td><td>&mdash; <span class="tag required">required</span></td></tr>
+      <tr><td><code>onChange</code></td><td><code>(n: number) =&gt; void</code></td><td>&mdash; <span class="tag required">required</span></td></tr>
+      <tr><td><code>min</code></td><td><code>number</code></td><td><code>0</code></td></tr>
+      <tr><td><code>max</code></td><td><code>number</code></td><td><code>99</code></td></tr>
+      <tr><td><code>label</code></td><td><code>string</code></td><td>&mdash;</td></tr>
+    </table>
+
+    <h4>Visual</h4>
+    <div style="display:inline-flex;border:3px solid #000;box-shadow:4px 4px 0 #000;font-family:var(--mono);">
+      <div style="padding:6px 10px;border-right:2px solid #000;cursor:pointer;">&#9660;</div>
+      <div style="padding:6px 14px;min-width:44px;text-align:center;font-weight:bold;font-size:15px;background:#fafafa;border-left:0;border-right:0;">5</div>
+      <div style="padding:6px 10px;border-left:2px solid #000;cursor:pointer;">&#9650;</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ColorPicker ── -->
+<h3 id="colorpicker">ColorPicker</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    ColorPicker
+    <span class="file-path">components/ColorPicker.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Grouped swatch grid for selecting the highlight color. Palettes are labelled
+      (Pastels, Bold, Muted). The active swatch shows a 4px border and a checkmark.
+    </p>
+    <p>See the <a href="#colors">Colors &amp; Palettes</a> section for the full set.</p>
+  </div>
+</div>
+
+<!-- ── ScanProgress ── -->
+<h3 id="scanprogress">ScanProgress</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    ScanProgress
+    <span class="file-path">components/ScanProgress.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Visual indicator showing how many shares have been scanned versus the
+      threshold (required) and total. Renders as a row of dots&mdash;filled dots
+      for scanned shares, bordered dots for remaining.
+    </p>
+
+    <h4>Props</h4>
+    <table>
+      <tr><th>Prop</th><th>Type</th><th>Notes</th></tr>
+      <tr><td><code>scanned</code></td><td><code>number</code></td><td>Filled dots count</td></tr>
+      <tr><td><code>threshold</code></td><td><code>number</code></td><td>Bold-bordered dots</td></tr>
+      <tr><td><code>total</code></td><td><code>number</code></td><td>Total dots</td></tr>
+    </table>
+
+    <h4>Visual</h4>
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+      <div style="width:20px;height:20px;border:3px solid #000;background:var(--highlight);"></div>
+      <div style="width:20px;height:20px;border:3px solid #000;background:var(--highlight);"></div>
+      <div style="width:20px;height:20px;border:3px solid #000;background:#fff;"></div>
+      <div style="width:20px;height:20px;border:2px solid #000;background:#fff;"></div>
+      <div style="width:20px;height:20px;border:2px solid #000;background:#fff;"></div>
+    </div>
+    <p style="font-family:var(--mono);font-size:12px;color:#999;">2 of 3 required &middot; 5 total</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ 3. NAVIGATION ═══════════════════ -->
+<h2 id="navigation">3. Navigation &amp; Tab Bar</h2>
+
+<div class="spec-card">
+  <div class="spec-card-header">
+    Custom Tab Bar
+    <span class="file-path">app/(tabs)/_layout.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      A custom bottom tab bar with five buttons rendered above a horizontal border.
+      The app version sits below the border.
+    </p>
+
+    <h4>Visual</h4>
+<pre>
+ [ HOME ] [ GENERATE ] [ SCAN ] [ VAULT ] [ SETTINGS ]
+ ─────────────────────────────────────────────────────
+                       v1.0.0</pre>
+
+    <h4>Tab States</h4>
+    <table>
+      <tr><th>State</th><th>Background</th><th>Border</th><th>Text</th><th>Shadow</th></tr>
+      <tr><td>Active</td><td>Highlight</td><td>3px black</td><td>Black, bold</td><td>4px offset</td></tr>
+      <tr><td>Inactive</td><td>White</td><td>3px <code>#DDD</code></td><td><code>#999</code></td><td>None</td></tr>
+    </table>
+
+    <h4>Tabs</h4>
+    <table>
+      <tr><th>Tab</th><th>Route</th><th>Contains</th></tr>
+      <tr><td>Home</td><td><code>/(tabs)/index</code></td><td>Landing page</td></tr>
+      <tr><td>Generate</td><td><code>/(tabs)/generate/*</code></td><td>8-step generation flow</td></tr>
+      <tr><td>Scan</td><td><code>/(tabs)/scan/*</code></td><td>QR scan + recovery</td></tr>
+      <tr><td>Vault</td><td><code>/(tabs)/vault/*</code></td><td>Saved secrets (auth-gated)</td></tr>
+      <tr><td>Settings</td><td><code>/(tabs)/settings/*</code></td><td>Preferences, theme, about</td></tr>
+    </table>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ 4. SCREENS ═══════════════════ -->
+<h2 id="screens">4. Screens</h2>
+
+<!-- ── Home ── -->
+<h3 id="screen-home">Home</h3>
+<div class="spec-card">
+  <div class="spec-card-header">
+    Home Screen
+    <span class="file-path">app/(tabs)/index.tsx</span>
+  </div>
+  <div class="spec-card-body">
+    <p>Landing page with branded header and navigation cards to the two main flows.</p>
+    <h4>Layout</h4>
+<pre>
+  n of m
+  SHAMIR
+  Ethereum Seed Phrase Manager
+
+  +-- Generate -------------------------+
+  | Create a new BIP39 seed phrase...   |
+  |                    [ NEW SECRET ]   |
+  +-------------------------------------+
+
+  +-- Scan -----------------------------+
+  | Scan your printed QR code shares... |
+  |                   [ SCAN SHARES ]   |
+  +-------------------------------------+
+
+  +-- How It Works ---------------------+
+  | Shamir's Secret Sharing splits...   |
+  |              Tap to learn more ->   |
+  +-------------------------------------+</pre>
+
+    <h4>Navigation</h4>
+    <ul>
+      <li>"New Secret" &rarr; <code>/(tabs)/generate</code></li>
+      <li>"Scan Shares" &rarr; <code>/(tabs)/scan</code></li>
+      <li>"How It Works" card &rarr; <code>/how-it-works</code></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Generate Flow ── -->
+<h3 id="screen-generate">Generate Flow (8 screens)</h3>
+
+<div class="flow">
+  <span class="flow-step">Landing</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Entropy</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Mnemonic</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Derivation</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Shamir Config</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Metadata</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Preview</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Share/Export</span>
+</div>
+
+<p>Alternative entry: <strong>Import</strong> replaces Entropy + Mnemonic.</p>
+
+<div class="flow">
+  <span class="flow-step">Landing</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Import</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Derivation</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">...</span>
+</div>
+
+<table>
+  <tr><th>Screen</th><th>File</th><th>Key Components</th><th>Purpose</th></tr>
+  <tr>
+    <td>Landing</td>
+    <td><code>generate/index.tsx</code></td>
+    <td>NeoCard, NeoButton</td>
+    <td>Choose New or Import</td>
+  </tr>
+  <tr>
+    <td>Entropy</td>
+    <td><code>generate/entropy.tsx</code></td>
+    <td>EntropyCanvas, NeoCard, NeoButton</td>
+    <td>Select &amp; collect entropy source (System / Motion / Combined)</td>
+  </tr>
+  <tr>
+    <td>Mnemonic</td>
+    <td><code>generate/mnemonic.tsx</code></td>
+    <td>MnemonicGrid, NeoButton</td>
+    <td>Generate seed phrase, select word count (12&ndash;24)</td>
+  </tr>
+  <tr>
+    <td>Import</td>
+    <td><code>generate/import.tsx</code></td>
+    <td>NeoInput (multiline, mono), MnemonicGrid, NeoBadge</td>
+    <td>Paste existing mnemonic, validate BIP39</td>
+  </tr>
+  <tr>
+    <td>Derivation</td>
+    <td><code>generate/derivation.tsx</code></td>
+    <td>AddressRow, PathSpinner, NeoButton</td>
+    <td>Pick path (MetaMask/Ledger/Custom), derive addresses</td>
+  </tr>
+  <tr>
+    <td>Shamir Config</td>
+    <td><code>generate/shamir.tsx</code></td>
+    <td>PathSpinner-style steppers, NeoCard</td>
+    <td>Set threshold (M) and total shares (N). M: 2&ndash;N, N: max 10</td>
+  </tr>
+  <tr>
+    <td>Metadata</td>
+    <td><code>generate/metadata.tsx</code></td>
+    <td>NeoInput, Switch, NeoCard</td>
+    <td>Name (defaults to timestamp), optional PIN (4&ndash;8 digits), optional BIP39 passphrase, optional card note</td>
+  </tr>
+  <tr>
+    <td>Preview</td>
+    <td><code>generate/preview.tsx</code></td>
+    <td>QRCodeView, NeoBadge, NeoButton</td>
+    <td>Review share cards, pick layout, generate PDF</td>
+  </tr>
+  <tr>
+    <td>Share/Export</td>
+    <td><code>generate/share.tsx</code></td>
+    <td>NeoCard, NeoButton, NeoBadge</td>
+    <td>Share PDF via system sheet, save to vault, done</td>
+  </tr>
+</table>
+
+<!-- ── Scan Flow ── -->
+<h3 id="screen-scan">Scan Flow (3 screens)</h3>
+
+<div class="flow">
+  <span class="flow-step">Scanner</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">PIN Entry</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">Result</span>
+</div>
+
+<table>
+  <tr><th>Screen</th><th>File</th><th>Key Components</th><th>Purpose</th></tr>
+  <tr>
+    <td>Scanner</td>
+    <td><code>scan/index.tsx</code></td>
+    <td>Camera, ScanProgress, NeoBadge, NeoButton</td>
+    <td>Scan QR share cards. Full-screen camera with viewfinder overlay (70% width, highlight border). Auto-advances when threshold met.</td>
+  </tr>
+  <tr>
+    <td>PIN Entry</td>
+    <td><code>scan/pin.tsx</code></td>
+    <td>NeoInput (secure), NeoCard, NeoButton</td>
+    <td>Enter PIN and/or passphrase to decrypt. Only shown if shares indicate protection.</td>
+  </tr>
+  <tr>
+    <td>Result</td>
+    <td><code>scan/result.tsx</code></td>
+    <td>MnemonicGrid, AddressRow, NeoBadge, NeoButton</td>
+    <td>Show recovered mnemonic, derive addresses, save to vault.</td>
+  </tr>
+</table>
+
+<h4>Scanner State Machine</h4>
+<div class="flow">
+  <span class="flow-step">idle</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step active">scanning</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">pin_required</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">reconstructing</span>
+  <span class="flow-arrow">&rarr;</span>
+  <span class="flow-step">done</span>
+</div>
+<p style="font-size:13px;color:var(--gray);">
+  Validation: checks JSON format, secret ID match, prevents duplicate indices, 1.5s cooldown between scans.
+</p>
+
+<!-- ── Vault ── -->
+<h3 id="screen-vault">Vault (auth-gated, 2 screens)</h3>
+
+<table>
+  <tr><th>Screen</th><th>File</th><th>Purpose</th></tr>
+  <tr>
+    <td>Vault List</td>
+    <td><code>vault/index.tsx</code></td>
+    <td>List saved secrets. Each card shows name, date, badges (word count, path, shamir config), lock status. Tap to open detail.</td>
+  </tr>
+  <tr>
+    <td>Vault Detail</td>
+    <td><code>vault/[id].tsx</code></td>
+    <td>View/manage single secret: editable name, lock/unlock toggle (Iosevka lock glyphs), seed phrase (MnemonicGrid), address list (AddressRow, pinnable, sorted), derive-more panel, metadata, delete.</td>
+  </tr>
+</table>
+
+<h4>Auth Gate</h4>
+<p>
+  The vault layout (<code>vault/_layout.tsx</code>) requires authentication when
+  "Require PIN / FaceID" is enabled in settings. Flow:
+</p>
+<ol>
+  <li>Check if auth is required (SecureStore flag)</li>
+  <li>Attempt FaceID/TouchID via <code>expo-local-authentication</code></li>
+  <li>Fall back to PIN entry if biometric fails</li>
+  <li>Show lock screen with retry / PIN input until authenticated</li>
+</ol>
+
+<h4>Locked Secret Behavior</h4>
+<p>When a secret is locked:</p>
+<ul>
+  <li>Cannot edit name</li>
+  <li>Cannot derive more addresses</li>
+  <li>Cannot delete</li>
+  <li>Must toggle unlock first (lock icon in header)</li>
+</ul>
+
+<!-- ── Settings ── -->
+<h3 id="screen-settings">Settings (4 screens)</h3>
+
+<table>
+  <tr><th>Screen</th><th>File</th><th>Purpose</th></tr>
+  <tr>
+    <td>Settings Landing</td>
+    <td><code>settings/index.tsx</code></td>
+    <td>
+      <strong>PIN Protection:</strong> set/change 4&ndash;8 digit PIN, status badge.<br>
+      <strong>Vault Access:</strong> toggle FaceID requirement (triggers verification).<br>
+      <strong>Defaults:</strong> word count (12&ndash;24), address count (5/10/20), path type.<br>
+      <strong>Links:</strong> Theme, PDF Layout, About.
+    </td>
+  </tr>
+  <tr>
+    <td>Theme</td>
+    <td><code>settings/theme.tsx</code></td>
+    <td>ColorPicker for highlight color + border thickness selector (1&ndash;5px buttons).</td>
+  </tr>
+  <tr>
+    <td>PDF Layout</td>
+    <td><code>settings/layout.tsx</code></td>
+    <td>Choose default layout (Full-page / Compact / Wallet Size). Shows visual preview diagram for each. Preview button generates sample PDF.</td>
+  </tr>
+  <tr>
+    <td>About</td>
+    <td><code>settings/about.tsx</code></td>
+    <td>Hero branding, version badge (v1.0.0), how-it-works steps, security bullet points, tech footer.</td>
+  </tr>
+</table>
+
+<!-- ── Informational ── -->
+<h3 id="screen-info">Informational Screens</h3>
+
+<table>
+  <tr><th>Screen</th><th>File</th><th>Purpose</th></tr>
+  <tr>
+    <td>How It Works</td>
+    <td><code>how-it-works.tsx</code></td>
+    <td>5-step walkthrough: Generate, Split, Threshold, Distribute, Recover. Visual aids (example QRs, number boxes). Links to math deep-dive.</td>
+  </tr>
+  <tr>
+    <td>The Mathematics</td>
+    <td><code>how-it-works-math.tsx</code></td>
+    <td>Polynomial construction, Lagrange interpolation, GF(256) arithmetic, security proof, concrete 2-of-3 example. Math in mono with gray background.</td>
+  </tr>
+  <tr>
+    <td>404</td>
+    <td><code>+not-found.tsx</code></td>
+    <td>Fallback for unknown routes. Link back to home.</td>
+  </tr>
+</table>
+
+
+<!-- ═══════════════════ 5. PDF SHARE CARDS ═══════════════════ -->
+<h2 id="pdf-cards">5. PDF Share Cards (v2)</h2>
+
+<div class="spec-card">
+  <div class="spec-card-header">
+    Card Layout &mdash; v2
+    <span class="file-path">lib/pdf/templates.ts</span>
+  </div>
+  <div class="spec-card-body">
+    <p>
+      Each share is rendered as a full-page card in the PDF. Cards are
+      <strong>never combined</strong> on the same page. The layout is subdivided
+      into labelled sections.
+    </p>
+
+    <h4>Card Structure</h4>
+<pre>
++================================================================+
+| 1 OF 5 SHAMIR SHARE        TOTAL: 5 . THRESHOLD: 3 . V2      |
++================================================================+
+| INSTRUCTIONS                                                    |
+|                                                                 |
+| This card is one fragment of   +- - - - - - -+                 |
+| a secret divided using         |  SCAN TO    |                 |
+| Shamir's Secret Sharing...     |  DOWNLOAD   |                 |
+| [bold important items]         |  APP        |                 |
+| [underline user-provided]      +- - - - - - -+                 |
++================================================================+
+| CREATED    2026-02-16                                           |
++================================================================+
+| NOTES                                                           |
+| _______________________________________________________________.|
+| _______________________________________________________________.|
+| _______________________________________________________________.|
+| _______________________________________________________________.|
++================================================================+
+|                    |                                             |
+| +----------------+ | This QR code contains your encrypted       |
+| |                | | share data. Scan it with the Shamir        |
+| | [SHARE QR]     | | recovery app to begin the reconstruction  |
+| |                | | process. You will need to scan at least    |
+| +----------------+ | 3 cards total.                             |
+|                    |                                             |
+|                    | Handle with care. If this card is lost or  |
+|                    | damaged you will need the remaining shares |
+|                    | to recover your secret. There are no       |
+|                    | backups.                                   |
+|                    |                                             |
+|                    | +------+  PRIMARY ADDRESS                  |
+|                    | |[ADDR]|  0x742d35Cc...6634C053            |
+|                    | +------+                                   |
++================================================================+
+| ! DO NOT LOSE THIS CARD -- THIS IS SHARE 1 OF ONLY 5.          |
+| YOU NEED AT LEAST 3 SHARES TO RECOVER YOUR SECRET.              |
+| LOSING TOO MANY SHARES MEANS PERMANENT LOSS OF ACCESS.         |
+|                                                                 |
+|                               a1b2c3d4-e5f6-7890-abcd-ef012345 |
++================================================================+</pre>
+
+    <h4>Section Details</h4>
+    <table>
+      <tr><th>Section</th><th>Content</th></tr>
+      <tr>
+        <td>Header</td>
+        <td>"n OF m SHAMIR SHARE" left-aligned. "TOTAL: m &middot; THRESHOLD: t &middot; V2" right-aligned. User-selected highlight background.</td>
+      </tr>
+      <tr>
+        <td>Instructions</td>
+        <td>
+          Explains what the card does. <b>Bold</b> for important items (threshold requirement,
+          security warnings). <u>Underline</u> for user-provided items (PIN, additional questions).
+          Does <em>not</em> reveal PIN existence, word count, or path&mdash;only hints that the user
+          "may need to provide" them. App download QR placeholder (80&times;80, dashed border) sits right.
+        </td>
+      </tr>
+      <tr>
+        <td>Created</td>
+        <td>ISO date (<code>YYYY-MM-DD</code>), inline with label.</td>
+      </tr>
+      <tr>
+        <td>Notes</td>
+        <td>Four ruled lines for handwritten notes. Min-height 80px.</td>
+      </tr>
+      <tr>
+        <td>Bottom</td>
+        <td>
+          <strong>Left:</strong> main share QR code (bordered, padded).<br>
+          <strong>Right top:</strong> paragraph explaining the QR code purpose and threshold.<br>
+          <strong>Right bottom:</strong> handle-with-care warning.<br>
+          <strong>Right footer:</strong> small address QR (56px) + truncated primary address.
+        </td>
+      </tr>
+      <tr>
+        <td>Footer</td>
+        <td>
+          Expanded "DO NOT LOSE" warning with share count and threshold.
+          GUID (share <code>id</code>) right-justified below. Gray background.
+        </td>
+      </tr>
+    </table>
+
+    <h4>QR Codes per Card</h4>
+    <table>
+      <tr><th>QR</th><th>Data</th><th>Size</th><th>Error Correction</th></tr>
+      <tr><td>Share QR (main)</td><td>JSON-stringified <code>SharePayload</code></td><td>140&ndash;240px (layout-dependent)</td><td>M (15%)</td></tr>
+      <tr><td>Address QR</td><td>First derived Ethereum address</td><td>56px</td><td>L (7%)</td></tr>
+      <tr><td>App Download</td><td>Placeholder (dashed box)</td><td>80px</td><td>&mdash;</td></tr>
+    </table>
+
+    <h4>Layout Options</h4>
+    <table>
+      <tr><th>Type</th><th>Label</th><th>QR Size</th><th>Cards/Page</th></tr>
+      <tr><td><code>full-page</code></td><td>Full Page</td><td>240px</td><td>1</td></tr>
+      <tr><td><code>2-up</code></td><td>Compact</td><td>180px</td><td>1</td></tr>
+      <tr><td><code>wallet-size</code></td><td>Wallet Size</td><td>140px</td><td>1</td></tr>
+    </table>
+    <p>All layouts enforce one card per page. Layout type controls QR size only.</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ 6. DATA MODEL ═══════════════════ -->
+<h2 id="data-model">6. Data Model</h2>
+
+<div class="spec-card">
+  <div class="spec-card-header">
+    Core Types
+    <span class="file-path">constants/types.ts</span>
+  </div>
+  <div class="spec-card-body">
+<pre>
+type WordCount = 12 | 15 | 18 | 21 | 24;
+type PathType  = 'metamask' | 'ledger' | 'custom';
+
+interface DerivedAddress {
+  index: number;
+  address: string;
+  privateKey: string;
+  pinned?: boolean;
+}
+
+interface ShamirConfig {
+  threshold: number;
+  totalShares: number;
+}
+
+interface SecretRecord {
+  id: string;
+  name: string;
+  createdAt: number;        // Unix timestamp
+  mnemonic: string;         // Encrypted in storage
+  wordCount: WordCount;
+  derivationPath: string;   // e.g. "m/44'/60'/0'/0"
+  pathType: PathType;
+  addressCount: number;
+  addresses: DerivedAddress[];
+  shamirConfig: ShamirConfig;
+  metadata?: Record&lt;string, string&gt;;
+  hasPassphrase: boolean;
+  hasPIN: boolean;
+  locked?: boolean;
+}
+
+interface SharePayload {
+  v: 1;                     // Format version
+  id: string;               // UUID linking all shares
+  name: string;
+  shareIndex: number;       // 1-based
+  totalShares: number;
+  threshold: number;
+  shareData: string;        // Hex-encoded Shamir share
+  derivationPath: string;
+  pathType: PathType;
+  wordCount: WordCount;
+  metadata?: Record&lt;string, string&gt;;
+  hasPIN: boolean;
+  hasPassphrase: boolean;
+}</pre>
+  </div>
+</div>
+
+<div class="spec-card">
+  <div class="spec-card-header">
+    Derivation Paths
+    <span class="file-path">constants/derivation.ts</span>
+  </div>
+  <div class="spec-card-body">
+    <table>
+      <tr><th>PathType</th><th>Template</th><th>Example (index 0)</th></tr>
+      <tr><td>metamask</td><td><code>m/44'/60'/0'/0/{i}</code></td><td><code>m/44'/60'/0'/0/0</code></td></tr>
+      <tr><td>ledger</td><td><code>m/44'/60'/{i}'/0/0</code></td><td><code>m/44'/60'/0'/0/0</code></td></tr>
+      <tr><td>custom</td><td>User-defined</td><td>&mdash;</td></tr>
+    </table>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ 7. STATE HOOKS ═══════════════════ -->
+<h2 id="state-hooks">7. State Hooks</h2>
+
+<table>
+  <tr><th>Hook</th><th>File</th><th>Scope</th><th>Key State</th></tr>
+  <tr>
+    <td><code>useTheme</code></td>
+    <td><code>hooks/useTheme.tsx</code></td>
+    <td>App-wide (ThemeProvider)</td>
+    <td><code>highlight</code>, <code>borderWidth</code>. Persisted to SecureStore.</td>
+  </tr>
+  <tr>
+    <td><code>useGenerateFlow</code></td>
+    <td><code>hooks/useGenerateFlow.tsx</code></td>
+    <td>Generate stack</td>
+    <td>Mnemonic, shares, name, PIN, passphrase, firstAddress, pdfUri. Reset on "Done".</td>
+  </tr>
+  <tr>
+    <td><code>useScanFlow</code></td>
+    <td><code>hooks/useScanFlow.tsx</code></td>
+    <td>Scan stack</td>
+    <td>Scanned shares, recovered mnemonic, addresses. Reset on "Done".</td>
+  </tr>
+  <tr>
+    <td><code>useScanner</code></td>
+    <td><code>hooks/useScanner.ts</code></td>
+    <td>Scanner screen</td>
+    <td>State machine (idle&rarr;scanning&rarr;pin_required&rarr;reconstructing&rarr;done). QR validation, dedup, cooldown.</td>
+  </tr>
+  <tr>
+    <td><code>useVault</code></td>
+    <td><code>hooks/useVault.ts</code></td>
+    <td>Vault screens</td>
+    <td>CRUD for SecretRecord list. Backed by <code>expo-secure-store</code>.</td>
+  </tr>
+</table>
+
+
+<!-- ═══════════════════ 8. USER FLOWS ═══════════════════ -->
+<h2 id="user-flows">8. User Flows</h2>
+
+<h3>Generate &amp; Export</h3>
+<ol>
+  <li>Home &rarr; Generate &rarr; choose "New" or "Import"</li>
+  <li><strong>New:</strong> pick entropy source &rarr; collect motion data (if selected) &rarr; generate mnemonic</li>
+  <li><strong>Import:</strong> paste words &rarr; validate BIP39 checksum</li>
+  <li>Select derivation path &rarr; derive addresses &rarr; review</li>
+  <li>Configure Shamir M-of-N (threshold 2&ndash;N, total max 10)</li>
+  <li>Add name (auto-defaults to timestamp), optional PIN, optional passphrase, optional card note</li>
+  <li>Preview share cards with QR codes &rarr; pick layout</li>
+  <li>Generate PDF &rarr; Share via system sheet / Save to vault</li>
+</ol>
+
+<h3>Scan &amp; Recover</h3>
+<ol>
+  <li>Home &rarr; Scan &rarr; "Start Scanning"</li>
+  <li>Scan QR codes through camera viewfinder (validates JSON, checks IDs, deduplicates)</li>
+  <li>When threshold met: if PIN/passphrase required &rarr; enter credentials</li>
+  <li>Reconstruct secret via Lagrange interpolation</li>
+  <li>View recovered mnemonic + derived addresses</li>
+  <li>Save to vault or done</li>
+</ol>
+
+<h3>Vault Management</h3>
+<ol>
+  <li>Home &rarr; Vault (authenticate if required)</li>
+  <li>Browse saved secrets &rarr; tap to open detail</li>
+  <li>Edit name, toggle lock, reveal/copy mnemonic, copy addresses</li>
+  <li>Derive additional addresses (when unlocked)</li>
+  <li>Delete secret (when unlocked, with confirmation)</li>
+</ol>
+
+
+<!-- ═══════════════════ 9. INTERACTION PATTERNS ═══════════════════ -->
+<h2 id="patterns">9. Interaction Patterns</h2>
+
+<table>
+  <tr><th>Pattern</th><th>Implementation</th></tr>
+  <tr>
+    <td>Press feedback</td>
+    <td>Button translates (2,2) and shadow shrinks from 4px to 2px. Immediate visual feedback.</td>
+  </tr>
+  <tr>
+    <td>Copy to clipboard</td>
+    <td>Floating "COPIED" text animates upward and fades over 1.2s. Uses <code>expo-clipboard</code>.</td>
+  </tr>
+  <tr>
+    <td>Loading</td>
+    <td><code>ActivityIndicator</code> with highlight color, centered below trigger button.</td>
+  </tr>
+  <tr>
+    <td>Error display</td>
+    <td>Red-bordered box (<code>#CC0000</code>) with error message text. Appears inline below the triggering element.</td>
+  </tr>
+  <tr>
+    <td>Warning</td>
+    <td>Orange text (<code>#CC6600</code>), smaller font (12px). Used for passphrase warnings and distribution reminders.</td>
+  </tr>
+  <tr>
+    <td>Toggle reveal</td>
+    <td>Button flips between SHOW/HIDE. Content masks as <code>****</code> when hidden. Used for mnemonics and private keys.</td>
+  </tr>
+  <tr>
+    <td>Focus ring</td>
+    <td>Input border transitions from black to highlight color on focus.</td>
+  </tr>
+  <tr>
+    <td>Confirmation</td>
+    <td>System <code>Alert.alert</code> for destructive actions (delete secret). Two-button: Cancel + Delete.</td>
+  </tr>
+  <tr>
+    <td>Navigation guard</td>
+    <td>Warning text on share screen about navigating away before exporting. No hard blocker.</td>
+  </tr>
+  <tr>
+    <td>Biometric prompt</td>
+    <td><code>expo-local-authentication</code> for vault gate. Falls back to PIN. Triggered on vault tab entry or when enabling vault protection.</td>
+  </tr>
+</table>
+
+<div class="spacer"></div>
+
+<p style="text-align:center;font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:2px;">
+  End of specification
+</p>
+
+</body>
+</html>

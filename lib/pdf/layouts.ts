@@ -10,6 +10,8 @@ export interface LayoutConfig {
   orientation: 'portrait' | 'landscape';
 }
 
+// Every layout now enforces one card per page.
+// Layout type controls QR size and orientation only.
 export const LAYOUTS: Record<LayoutType, LayoutConfig> = {
   'full-page': {
     label: 'Full Page',
@@ -17,25 +19,25 @@ export const LAYOUTS: Record<LayoutType, LayoutConfig> = {
     cardsPerPage: 1,
     cardWidth: '100%',
     cardHeight: '100%',
-    qrSize: 300,
+    qrSize: 240,
     orientation: 'portrait',
   },
   '2-up': {
-    label: '2-Up',
-    description: 'Two cards per page',
-    cardsPerPage: 2,
+    label: 'Compact',
+    description: 'One card per page, medium QR code',
+    cardsPerPage: 1,
     cardWidth: '100%',
-    cardHeight: '48%',
-    qrSize: 200,
+    cardHeight: '100%',
+    qrSize: 180,
     orientation: 'portrait',
   },
   'wallet-size': {
     label: 'Wallet Size',
-    description: 'Credit card size, 4 per page',
-    cardsPerPage: 4,
-    cardWidth: '48%',
-    cardHeight: '48%',
-    qrSize: 120,
-    orientation: 'landscape',
+    description: 'One card per page, small QR code',
+    cardsPerPage: 1,
+    cardWidth: '100%',
+    cardHeight: '100%',
+    qrSize: 140,
+    orientation: 'portrait',
   },
 };

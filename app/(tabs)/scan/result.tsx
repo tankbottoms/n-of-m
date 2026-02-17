@@ -72,7 +72,7 @@ export default function ResultScreen() {
         update({ addresses: derived });
         setLoading(false);
       } catch (err) {
-        console.error('Result reconstruction error:', err);
+        if (__DEV__) console.error('Result reconstruction error:', err);
         setError(err instanceof Error ? err.message : 'Failed to process recovered secret');
         setLoading(false);
       }
@@ -116,7 +116,7 @@ export default function ResultScreen() {
       await save(record);
       setSaved(true);
     } catch (err) {
-      console.error('Save error:', err);
+      if (__DEV__) console.error('Save error:', err);
       setError(err instanceof Error ? err.message : 'Failed to save to vault');
     } finally {
       setSaving(false);

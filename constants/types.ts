@@ -5,6 +5,7 @@ export interface DerivedAddress {
   index: number;
   address: string;
   privateKey: string;
+  pinned?: boolean;
 }
 
 export interface ShamirConfig {
