@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { router } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { NeoCard, NeoButton, NeoBadge } from '../../../components/neo';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
+import { VERSION_STRING, FULL_VERSION } from '../../../constants/version';
 
 export default function AboutScreen() {
   const { highlight } = useTheme();
@@ -14,7 +16,7 @@ export default function AboutScreen() {
         <Text style={styles.brandName}>n of m</Text>
         <Text style={styles.appName}>SHAMIR</Text>
         <Text style={styles.tagline}>Ethereum Seed Phrase Manager</Text>
-        <NeoBadge text="v1.0.0" variant="highlight" />
+        <NeoBadge text={VERSION_STRING} variant="highlight" />
       </View>
 
       <NeoCard title="About" style={styles.section}>
@@ -109,6 +111,18 @@ export default function AboutScreen() {
         </View>
       </NeoCard>
 
+      <NeoCard title="Author" style={styles.section}>
+        <Text style={styles.bodyText}>Created by Mark Phillips</Text>
+        <View style={{ marginTop: 8 }}>
+          <Text style={styles.bodyText}>Send a note to the author:</Text>
+          <Pressable onPress={() => Linking.openURL('mailto:rooot@atsignhandle.xyz')}>
+            <Text style={[styles.bodyText, styles.emailLink]}>
+              rooot [at] atsignhandle dot xyz
+            </Text>
+          </Pressable>
+        </View>
+      </NeoCard>
+
       <NeoButton
         title="How It Works"
         variant="secondary"
@@ -125,6 +139,9 @@ export default function AboutScreen() {
       <View style={styles.footer}>
         <Text style={styles.footerText}>
           Built with Expo, React Native, and ethers.js
+        </Text>
+        <Text style={[styles.footerText, { marginTop: 4 }]}>
+          {FULL_VERSION}
         </Text>
       </View>
     </ScrollView>
@@ -235,5 +252,10 @@ const styles = StyleSheet.create({
     color: '#999',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  emailLink: {
+    color: '#0066FF',
+    textDecorationLine: 'underline',
+    marginTop: 4,
   },
 });

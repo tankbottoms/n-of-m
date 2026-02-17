@@ -1,13 +1,24 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  Pressable,
+} from 'react-native';
 import { router } from 'expo-router';
-import { NeoButton, NeoCard, NeoBadge } from '../../../components/neo';
+import { WebView } from 'react-native-webview';
+import { NeoButton, NeoCard, NeoBadge, NeoModal } from '../../../components/neo';
 import { QRCodeView } from '../../../components/QRCodeView';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
 import { generatePDF } from '../../../lib/pdf/generate';
+import { renderSingleCardHTML } from '../../../lib/pdf/templates';
 import { LAYOUTS, LayoutType } from '../../../lib/pdf/layouts';
+import { DERIVATION_PATHS } from '../../../constants/derivation';
+import { SharePayload } from '../../../constants/types';
 
 const LAYOUT_OPTIONS: LayoutType[] = ['full-page', '2-up', 'wallet-size'];
 
@@ -19,6 +30,9 @@ export default function PreviewScreen() {
   const [layoutType, setLayoutType] = useState<LayoutType>('full-page');
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [modalShare, setModalShare] = useState<SharePayload | null>(null);
+
+  const generationDate = new Date().toISOString().replace('T', ' ').slice(0, 16);
 
   const handleGeneratePDF = useCallback(async () => {
     if (shares.length === 0) return;
@@ -55,6 +69,11 @@ export default function PreviewScreen() {
     );
   }
 
+  const pathLabel =
+    shares[0].pathType !== 'custom'
+      ? DERIVATION_PATHS[shares[0].pathType]?.label
+      : 'Custom';
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.heading}>Preview</Text>
@@ -80,45 +99,91 @@ export default function PreviewScreen() {
       </NeoCard>
 
       {/* Share card previews */}
-      {shares.map((share, i) => {
+      {shares.map((share) => {
         const qrData = JSON.stringify(share);
+        const cardTitle = `${share.name}-${share.shareIndex}`;
+        const derivPath = `${share.derivationPath} (${pathLabel})`;
+
         return (
-          <NeoCard
+          <Pressable
             key={share.shareIndex}
-            title={`Share ${share.shareIndex} of ${share.totalShares}`}
-            style={{ marginTop: 16 }}
+            onPress={() => setModalShare(share)}
           >
-            <View style={styles.shareCard}>
-              <View style={styles.qrWrapper}>
-                <QRCodeView value={qrData} size={140} />
-              </View>
-              <View style={styles.shareMeta}>
-                <NeoBadge
-                  text={`${share.threshold} of ${share.totalShares}`}
-                  variant="highlight"
-                  style={{ marginBottom: 8 }}
-                />
-                <Text style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>Name: </Text>
-                  {share.name}
+            <NeoCard showHeader={false} style={{ marginTop: 16 }}>
+              {/* Header bar mimicking PDF card */}
+              <View style={[styles.cardHeader, { backgroundColor: highlight }]}>
+                <Text style={styles.cardHeaderTitle}>
+                  {share.shareIndex} OF {share.totalShares}
                 </Text>
-                <Text style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>Path: </Text>
-                  {share.pathType}
-                </Text>
-                <Text style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>Words: </Text>
-                  {share.wordCount}
-                </Text>
-                <Text style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>PIN: </Text>
-                  {share.hasPIN ? 'Required' : 'None'}
+                <Text style={styles.cardHeaderMeta}>
+                  {share.threshold} of {share.totalShares} required
                 </Text>
               </View>
-            </View>
-          </NeoCard>
+
+              <View style={styles.shareCard}>
+                <View style={styles.qrWrapper}>
+                  <QRCodeView value={qrData} size={140} />
+                </View>
+                <View style={styles.shareMeta}>
+                  <Text style={styles.cardName}>{cardTitle}</Text>
+                  <Text style={styles.metaRow}>
+                    <Text style={styles.metaLabel}>Path: </Text>
+                    {derivPath}
+                  </Text>
+                  <Text style={styles.metaRow}>
+                    <Text style={styles.metaLabel}>Words: </Text>
+                    {share.wordCount}
+                  </Text>
+                  {share.hasPIN && (
+                    <NeoBadge
+                      text={'PIN ' + 'X'.repeat(state.pin?.length ?? 4)}
+                      variant="dark"
+                      style={{ marginTop: 6 }}
+                    />
+                  )}
+                  <Text style={styles.dateText}>{generationDate}</Text>
+                </View>
+              </View>
+
+              {/* Footer */}
+              <View style={styles.cardFooter}>
+                <Text style={styles.footerWarning}>
+                  DO NOT LOSE -- SHARE {share.shareIndex} OF {share.totalShares}
+                </Text>
+                <Text style={styles.footerInfo}>
+                  PIN: {share.hasPIN ? 'ENABLED' : 'NONE'} / PASSPHRASE: {share.hasPassphrase ? 'ENABLED' : 'NONE'}
+                </Text>
+              </View>
+
+              <Text style={styles.tapHint}>Tap to view full card</Text>
+            </NeoCard>
+          </Pressable>
         );
       })}
+
+      {/* Full card modal */}
+      <NeoModal
+        visible={modalShare !== null}
+        onClose={() => setModalShare(null)}
+        title={modalShare ? `Share ${modalShare.shareIndex} of ${modalShare.totalShares}` : ''}
+        fullScreen
+      >
+        {modalShare && (
+          <WebView
+            originWhitelist={['*']}
+            source={{
+              html: renderSingleCardHTML(
+                modalShare,
+                highlight,
+                LAYOUTS[layoutType],
+                state.firstAddress
+              ),
+            }}
+            style={{ flex: 1 }}
+            scrollEnabled
+          />
+        )}
+      </NeoModal>
 
       {/* Error message */}
       {error && (
@@ -128,20 +193,20 @@ export default function PreviewScreen() {
       )}
 
       {/* Generate PDF button */}
-      <NeoButton
-        title={generating ? 'Generating...' : 'Generate PDF'}
-        onPress={handleGeneratePDF}
-        disabled={generating}
-        style={{ marginTop: 24 }}
-      />
-
-      {generating && (
-        <ActivityIndicator
-          size="large"
-          color={highlight}
-          style={{ marginTop: 16 }}
+      <View style={{ marginTop: 24 }}>
+        <NeoButton
+          title={generating ? 'Generating...' : 'Generate PDF'}
+          onPress={handleGeneratePDF}
+          disabled={generating}
         />
-      )}
+        {generating && (
+          <ActivityIndicator
+            size="small"
+            color={highlight}
+            style={{ position: 'absolute', right: 16, top: 14 }}
+          />
+        )}
+      </View>
     </ScrollView>
   );
 }
@@ -185,10 +250,35 @@ const styles = StyleSheet.create({
     marginTop: 10,
     lineHeight: 18,
   },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderBottomWidth: NEO.borderWidth,
+    borderBottomColor: NEO.border,
+  },
+  cardHeaderTitle: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 14,
+    color: NEO.text,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  cardHeaderMeta: {
+    fontFamily: NEO.fontUI,
+    fontSize: 10,
+    color: NEO.text,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    opacity: 0.7,
+  },
   shareCard: {
     flexDirection: 'row',
     gap: 16,
     alignItems: 'flex-start',
+    padding: 12,
   },
   qrWrapper: {
     flexShrink: 0,
@@ -196,6 +286,14 @@ const styles = StyleSheet.create({
   shareMeta: {
     flex: 1,
     paddingTop: 4,
+  },
+  cardName: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 15,
+    color: NEO.text,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 6,
   },
   metaRow: {
     fontFamily: NEO.fontUI,
@@ -208,6 +306,41 @@ const styles = StyleSheet.create({
     color: '#666',
     textTransform: 'uppercase',
     fontSize: 11,
+  },
+  dateText: {
+    fontFamily: NEO.fontMono,
+    fontSize: 11,
+    color: '#999',
+    marginTop: 8,
+  },
+  cardFooter: {
+    backgroundColor: '#f5f5f5',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderTopWidth: 2,
+    borderTopColor: NEO.border,
+  },
+  footerWarning: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 9,
+    color: NEO.text,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  footerInfo: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 8,
+    color: '#666',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 2,
+  },
+  tapHint: {
+    fontFamily: NEO.fontUI,
+    fontSize: 11,
+    color: '#BBB',
+    textAlign: 'center',
+    paddingVertical: 6,
   },
   errorBox: {
     borderWidth: 2,

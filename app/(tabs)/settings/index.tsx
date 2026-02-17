@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { NeoCard, NeoButton, NeoInput, NeoBadge } from '../../../components/neo';
+import { PathEditor } from '../../../components/PathEditor';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { setPIN, hasPIN } from '../../../lib/storage/keys';
@@ -27,11 +28,12 @@ import { WordCount, PathType } from '../../../constants/types';
 
 const WORD_OPTIONS: WordCount[] = [12, 15, 18, 21, 24];
 const ADDRESS_OPTIONS = [5, 10, 20];
-const PATH_OPTIONS: PathType[] = ['metamask', 'ledger'];
+const PATH_OPTIONS: PathType[] = ['metamask', 'ledger', 'custom'];
 
 const STORE_WORD_COUNT = 'shamir_default_word_count';
 const STORE_ADDR_COUNT = 'shamir_default_addr_count';
 const STORE_PATH_TYPE = 'shamir_default_path_type';
+export const STORE_DEFAULT_PATH = 'shamir_default_derivation_path';
 
 export default function SettingsScreen() {
   const { highlight } = useTheme();
@@ -50,6 +52,7 @@ export default function SettingsScreen() {
   const [wordCount, setWordCount] = useState<WordCount>(DEFAULT_WORD_COUNT);
   const [addressCount, setAddressCount] = useState(DEFAULT_ADDRESS_COUNT);
   const [pathType, setPathType] = useState<PathType>(DEFAULT_PATH_TYPE);
+  const [defaultPath, setDefaultPath] = useState("m/44'/60'/0'/0/0");
 
   useEffect(() => {
     hasPIN().then(setPinSet);
@@ -64,6 +67,9 @@ export default function SettingsScreen() {
     });
     SecureStore.getItemAsync(STORE_PATH_TYPE).then((v) => {
       if (v) setPathType(v as PathType);
+    });
+    SecureStore.getItemAsync(STORE_DEFAULT_PATH).then((v) => {
+      if (v) setDefaultPath(v);
     });
   }, []);
 
@@ -106,6 +112,16 @@ export default function SettingsScreen() {
   const handlePathType = useCallback(async (pt: PathType) => {
     setPathType(pt);
     await SecureStore.setItemAsync(STORE_PATH_TYPE, pt);
+    if (pt !== 'custom') {
+      const resolved = DERIVATION_PATHS[pt].template.replace('{index}', '0');
+      setDefaultPath(resolved);
+      await SecureStore.setItemAsync(STORE_DEFAULT_PATH, resolved);
+    }
+  }, []);
+
+  const handleDefaultPath = useCallback(async (newPath: string) => {
+    setDefaultPath(newPath);
+    await SecureStore.setItemAsync(STORE_DEFAULT_PATH, newPath);
   }, []);
 
   return (
@@ -305,6 +321,14 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </View>
+
+        <Text style={[styles.fieldLabel, { marginTop: 16 }]}>Default Path</Text>
+        <PathEditor
+          path={defaultPath}
+          onChange={handleDefaultPath}
+          pathType={pathType}
+          showLabel
+        />
       </NeoCard>
 
       {/* Links */}

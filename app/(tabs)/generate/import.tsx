@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { NeoButton, NeoCard } from '../../../components/neo';
@@ -6,7 +6,7 @@ import { MnemonicGrid } from '../../../components/MnemonicGrid';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
-import { validateMnemonic } from '../../../lib/wallet';
+import { generateMnemonic, validateMnemonic } from '../../../lib/wallet';
 import { WordCount } from '../../../constants/types';
 
 const VALID_WORD_COUNTS = [12, 15, 18, 21, 24];
@@ -18,6 +18,11 @@ export default function ImportScreen() {
   const [input, setInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [validated, setValidated] = useState(false);
+
+  useEffect(() => {
+    const phrase = generateMnemonic(24);
+    setInput(phrase);
+  }, []);
 
   const words = input
     .trim()

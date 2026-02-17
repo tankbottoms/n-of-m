@@ -10,18 +10,24 @@ import {
   TextInput,
 } from 'react-native';
 import { Buffer } from 'buffer';
+import { WebView } from 'react-native-webview';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { NeoCard, NeoButton, NeoBadge } from '../../../components/neo';
+import * as Crypto from 'expo-crypto';
+import { NeoCard, NeoButton, NeoBadge, NeoModal } from '../../../components/neo';
 import { MnemonicGrid } from '../../../components/MnemonicGrid';
 import { AddressRow } from '../../../components/AddressRow';
+import { PathEditor } from '../../../components/PathEditor';
+import { QRCodeView } from '../../../components/QRCodeView';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { useVault } from '../../../hooks/useVault';
-import { DERIVATION_PATHS } from '../../../constants/derivation';
+import { DERIVATION_PATHS, getDerivationPath } from '../../../constants/derivation';
 import { deriveAddresses } from '../../../lib/wallet';
 import { split } from '../../../lib/shamir';
 import { generatePDF, sharePDF } from '../../../lib/pdf/generate';
-import { PathType, SharePayload } from '../../../constants/types';
+import { renderSingleCardHTML } from '../../../lib/pdf/templates';
+import { LAYOUTS } from '../../../lib/pdf/layouts';
+import { PathType, SharePayload, SecretRecord } from '../../../constants/types';
 
 function formatDate(ts: number): string {
   const d = new Date(ts);
@@ -35,10 +41,15 @@ function formatDate(ts: number): string {
   });
 }
 
+function formatDateShort(): string {
+  const d = new Date();
+  return d.toISOString().replace('T', ' ').slice(0, 16);
+}
+
 export default function VaultDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { highlight } = useTheme();
-  const { secrets, loading, update, remove } = useVault();
+  const { secrets, loading, update, save, remove } = useVault();
   const [mnemonicRevealed, setMnemonicRevealed] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -50,6 +61,15 @@ export default function VaultDetailScreen() {
 
   const [derivePathType, setDerivePathType] = useState<PathType>(secret?.pathType ?? 'metamask');
   const [generatingPDF, setGeneratingPDF] = useState(false);
+
+  // Modal states
+  const [pdfModalVisible, setPdfModalVisible] = useState(false);
+  const [pdfModalHTML, setPdfModalHTML] = useState('');
+  const [duplicateModalVisible, setDuplicateModalVisible] = useState(false);
+  const [dupName, setDupName] = useState('');
+  const [dupPath, setDupPath] = useState("m/44'/60'/0'/0/0");
+  const [exportWarningVisible, setExportWarningVisible] = useState(false);
+  const [exportQRVisible, setExportQRVisible] = useState(false);
 
   const handleDelete = useCallback(() => {
     if (!secret) return;
@@ -126,30 +146,35 @@ export default function VaultDetailScreen() {
     }, 50);
   }, [secret, derivePathType, update]);
 
+  const buildSharePayloads = useCallback((): SharePayload[] => {
+    if (!secret) return [];
+    const secretBuffer = Buffer.from(secret.mnemonic);
+    const shares = split(secretBuffer, {
+      shares: secret.shamirConfig.totalShares,
+      threshold: secret.shamirConfig.threshold,
+    });
+    return shares.map((shareBuf, i) => ({
+      v: 1 as const,
+      id: secret.id,
+      name: secret.name,
+      shareIndex: i + 1,
+      totalShares: secret.shamirConfig.totalShares,
+      threshold: secret.shamirConfig.threshold,
+      shareData: (shareBuf as Buffer).toString('hex'),
+      derivationPath: secret.derivationPath,
+      pathType: secret.pathType,
+      wordCount: secret.wordCount,
+      metadata: secret.metadata,
+      hasPIN: secret.hasPIN,
+      hasPassphrase: secret.hasPassphrase,
+    }));
+  }, [secret]);
+
   const handleDownloadPDF = useCallback(async () => {
     if (!secret) return;
     setGeneratingPDF(true);
     try {
-      const secretBuffer = Buffer.from(secret.mnemonic);
-      const shares = split(secretBuffer, {
-        shares: secret.shamirConfig.totalShares,
-        threshold: secret.shamirConfig.threshold,
-      });
-      const sharePayloads: SharePayload[] = shares.map((shareBuf, i) => ({
-        v: 1 as const,
-        id: secret.id,
-        name: secret.name,
-        shareIndex: i + 1,
-        totalShares: secret.shamirConfig.totalShares,
-        threshold: secret.shamirConfig.threshold,
-        shareData: (shareBuf as Buffer).toString('hex'),
-        derivationPath: secret.derivationPath,
-        pathType: secret.pathType,
-        wordCount: secret.wordCount,
-        metadata: secret.metadata,
-        hasPIN: secret.hasPIN,
-        hasPassphrase: secret.hasPassphrase,
-      }));
+      const sharePayloads = buildSharePayloads();
       const firstAddr = secret.addresses.length > 0 ? secret.addresses[0].address : undefined;
       const uri = await generatePDF(sharePayloads, highlight, 'full-page', firstAddr);
       await sharePDF(uri);
@@ -158,7 +183,17 @@ export default function VaultDetailScreen() {
       Alert.alert('Error', 'Failed to generate PDF.');
     }
     setGeneratingPDF(false);
-  }, [secret, highlight]);
+  }, [secret, highlight, buildSharePayloads]);
+
+  const handleViewPDF = useCallback(() => {
+    if (!secret) return;
+    const sharePayloads = buildSharePayloads();
+    if (sharePayloads.length === 0) return;
+    const firstAddr = secret.addresses.length > 0 ? secret.addresses[0].address : undefined;
+    const html = renderSingleCardHTML(sharePayloads[0], highlight, LAYOUTS['full-page'], firstAddr);
+    setPdfModalHTML(html);
+    setPdfModalVisible(true);
+  }, [secret, highlight, buildSharePayloads]);
 
   const handleTogglePin = useCallback(async (addrIndex: number) => {
     if (!secret) return;
@@ -167,6 +202,57 @@ export default function VaultDetailScreen() {
     );
     await update(secret.id, { addresses: updatedAddresses });
   }, [secret, update]);
+
+  const handleOpenDuplicate = useCallback(() => {
+    if (!secret) return;
+    setDupName(formatDateShort());
+    const resolved = getDerivationPath(secret.pathType, 0, secret.derivationPath);
+    setDupPath(resolved);
+    setDuplicateModalVisible(true);
+  }, [secret]);
+
+  const handleDuplicate = useCallback(async () => {
+    if (!secret) return;
+    try {
+      const newId = Crypto.randomUUID();
+      const newAddresses = deriveAddresses(
+        secret.mnemonic,
+        'custom',
+        secret.addressCount,
+        dupPath.replace(/\/\d+$/, '/{index}')
+      );
+      const newRecord: SecretRecord = {
+        id: newId,
+        name: dupName.trim() || formatDateShort(),
+        createdAt: Date.now(),
+        mnemonic: secret.mnemonic,
+        wordCount: secret.wordCount,
+        derivationPath: dupPath.replace(/\/\d+$/, '/{index}'),
+        pathType: 'custom',
+        addressCount: secret.addressCount,
+        addresses: newAddresses,
+        shamirConfig: { ...secret.shamirConfig },
+        metadata: secret.metadata ? { ...secret.metadata } : undefined,
+        hasPassphrase: secret.hasPassphrase,
+        hasPIN: secret.hasPIN,
+      };
+      await save(newRecord);
+      setDuplicateModalVisible(false);
+      Alert.alert('Duplicated', `"${newRecord.name}" has been created.`);
+    } catch (err) {
+      if (__DEV__) console.error('Duplicate error:', err);
+      Alert.alert('Error', 'Failed to duplicate seed.');
+    }
+  }, [secret, dupName, dupPath, save]);
+
+  const handleExportData = useCallback(() => {
+    setExportWarningVisible(true);
+  }, []);
+
+  const handleExportConfirm = useCallback(() => {
+    setExportWarningVisible(false);
+    setExportQRVisible(true);
+  }, []);
 
   if (loading) {
     return (
@@ -254,6 +340,9 @@ export default function VaultDetailScreen() {
                 variant={isLocked ? 'highlight' : 'outline'}
               />
             </Pressable>
+            <Pressable onPress={handleOpenDuplicate}>
+              <NeoBadge text="COPY" variant="outline" />
+            </Pressable>
           </View>
 
           <View style={styles.detailsGrid}>
@@ -296,18 +385,33 @@ export default function VaultDetailScreen() {
 
         {/* Addresses */}
         <NeoCard title="Derived Addresses" style={styles.section}>
+          <View style={styles.addressHeaderRow}>
+            <NeoBadge text={String(sortedAddresses.length)} variant="highlight" />
+          </View>
           {sortedAddresses.length === 0 ? (
             <Text style={styles.bodyText}>No addresses derived.</Text>
           ) : (
             <>
-              {sortedAddresses.map((addr) => (
-                <AddressRow
-                  key={addr.index}
-                  address={addr}
-                  pinned={addr.pinned}
-                  onTogglePin={() => handleTogglePin(addr.index)}
-                />
-              ))}
+              {sortedAddresses.map((addr) => {
+                const fullPath = getDerivationPath(
+                  secret.pathType,
+                  addr.index,
+                  secret.derivationPath
+                );
+                return (
+                  <View key={addr.index}>
+                    <View style={styles.addrPathRow}>
+                      <NeoBadge text={`#${addr.index}`} variant="outline" />
+                      <Text style={styles.addrPath}>{fullPath}</Text>
+                    </View>
+                    <AddressRow
+                      address={addr}
+                      pinned={addr.pinned}
+                      onTogglePin={() => handleTogglePin(addr.index)}
+                    />
+                  </View>
+                );
+              })}
             </>
           )}
         </NeoCard>
@@ -316,6 +420,15 @@ export default function VaultDetailScreen() {
         <NeoCard title="Derive More" style={styles.section}>
           <Text style={styles.bodyText}>
             Generate additional addresses from this seed phrase.
+          </Text>
+
+          <Text style={styles.pathTemplateAbove}>
+            {derivePathType === 'custom'
+              ? secret.derivationPath
+              : DERIVATION_PATHS[derivePathType].template.replace(
+                  '{index}',
+                  `${secret.addresses.length}...`
+                )}
           </Text>
 
           <View style={{ marginTop: 12 }}>
@@ -334,26 +447,13 @@ export default function VaultDetailScreen() {
             </View>
           </View>
 
-          <Text style={styles.pathTemplate}>
-            {derivePathType === 'custom'
-              ? secret.derivationPath
-              : DERIVATION_PATHS[derivePathType].template.replace(
-                  '{index}',
-                  `${secret.addresses.length}...`
-                )}
-          </Text>
-
-          {deriving && (
-            <ActivityIndicator size="small" color={highlight} style={{ marginTop: 12 }} />
-          )}
-
           <View style={{ marginTop: 16 }}>
             <Text style={styles.detailLabel}>Generate</Text>
             <View style={[styles.pathTypeRow, { marginTop: 6 }]}>
               {[5, 10, 20].map((n) => (
                 <NeoButton
                   key={n}
-                  title={`+${n}`}
+                  title={deriving ? '...' : `+${n}`}
                   size="sm"
                   variant="secondary"
                   onPress={() => handleDeriveMore(n)}
@@ -361,6 +461,9 @@ export default function VaultDetailScreen() {
                   style={{ minWidth: 50 }}
                 />
               ))}
+              {deriving && (
+                <ActivityIndicator size="small" color={highlight} />
+              )}
             </View>
           </View>
         </NeoCard>
@@ -377,17 +480,36 @@ export default function VaultDetailScreen() {
           </NeoCard>
         )}
 
-        {/* Download PDF */}
+        {/* PDF Actions */}
+        <View style={styles.pdfRow}>
+          <View style={{ flex: 1, position: 'relative' }}>
+            <NeoButton
+              title={generatingPDF ? 'Generating...' : 'Download PDF'}
+              onPress={handleDownloadPDF}
+              disabled={generatingPDF || isLocked}
+              variant="secondary"
+            />
+            {generatingPDF && (
+              <ActivityIndicator size="small" color={highlight} style={{ position: 'absolute', right: 12, top: 12 }} />
+            )}
+          </View>
+          <NeoButton
+            title="View PDF"
+            onPress={handleViewPDF}
+            disabled={isLocked}
+            variant="secondary"
+            style={{ flex: 1 }}
+          />
+        </View>
+
+        {/* Export Data */}
         <NeoButton
-          title={generatingPDF ? 'Generating PDF...' : 'Download PDF'}
-          onPress={handleDownloadPDF}
-          disabled={generatingPDF || isLocked}
-          variant="secondary"
-          style={{ marginTop: 24 }}
+          title="Export Data (Expert)"
+          variant="danger"
+          onPress={handleExportData}
+          disabled={isLocked}
+          style={{ marginTop: 16 }}
         />
-        {generatingPDF && (
-          <ActivityIndicator size="small" color={highlight} style={{ marginTop: 8 }} />
-        )}
 
         {/* Delete - at very bottom */}
         <NeoButton
@@ -398,6 +520,108 @@ export default function VaultDetailScreen() {
           style={{ marginTop: 32, marginBottom: 20 }}
         />
       </ScrollView>
+
+      {/* PDF Viewer Modal */}
+      <NeoModal
+        visible={pdfModalVisible}
+        onClose={() => setPdfModalVisible(false)}
+        title="PDF Preview"
+        fullScreen
+      >
+        <WebView
+          originWhitelist={['*']}
+          source={{ html: pdfModalHTML }}
+          style={{ flex: 1 }}
+          scrollEnabled
+        />
+      </NeoModal>
+
+      {/* Duplicate Modal */}
+      <NeoModal
+        visible={duplicateModalVisible}
+        onClose={() => setDuplicateModalVisible(false)}
+        title="Duplicate Seed"
+      >
+        <Text style={styles.bodyText}>
+          Create a copy of this seed with a new derivation path.
+        </Text>
+        <View style={{ marginTop: 16 }}>
+          <Text style={styles.detailLabel}>Name</Text>
+          <TextInput
+            style={styles.dupInput}
+            value={dupName}
+            onChangeText={setDupName}
+            placeholder="Enter name..."
+            placeholderTextColor="#999"
+          />
+        </View>
+        <View style={{ marginTop: 16 }}>
+          <Text style={styles.detailLabel}>Derivation Path</Text>
+          <PathEditor
+            path={dupPath}
+            onChange={setDupPath}
+          />
+        </View>
+        <NeoButton
+          title="Duplicate"
+          onPress={handleDuplicate}
+          style={{ marginTop: 20 }}
+        />
+      </NeoModal>
+
+      {/* Export Warning Modal */}
+      <NeoModal
+        visible={exportWarningVisible}
+        onClose={() => setExportWarningVisible(false)}
+        title="Danger -- Expert Mode"
+      >
+        <View style={styles.dangerBox}>
+          <Text style={styles.dangerText}>
+            This will encode your complete address data including private keys
+            in a QR code in CLEAR TEXT.
+          </Text>
+          <Text style={[styles.dangerText, { marginTop: 12 }]}>
+            This should NEVER be shared with anyone you do not trust.
+          </Text>
+        </View>
+        <View style={styles.exportActions}>
+          <NeoButton
+            title="I Understand -- Show QR"
+            variant="danger"
+            onPress={handleExportConfirm}
+          />
+          <NeoButton
+            title="Cancel"
+            variant="secondary"
+            onPress={() => setExportWarningVisible(false)}
+            style={{ marginTop: 8 }}
+          />
+        </View>
+      </NeoModal>
+
+      {/* Export QR Modal */}
+      <NeoModal
+        visible={exportQRVisible}
+        onClose={() => setExportQRVisible(false)}
+        title="Export Data"
+      >
+        <View style={styles.warningBox}>
+          <Text style={styles.warningText}>
+            PRIVATE KEYS IN CLEAR TEXT -- DO NOT SHARE
+          </Text>
+        </View>
+        {secret && (
+          <View style={{ alignItems: 'center', marginTop: 16 }}>
+            <QRCodeView
+              value={JSON.stringify(secret.addresses)}
+              size={260}
+            />
+            <Text style={[styles.bodyText, { marginTop: 12, textAlign: 'center' }]}>
+              {secret.addresses.length} addresses encoded
+            </Text>
+          </View>
+        )}
+      </NeoModal>
     </>
   );
 }
@@ -418,11 +642,11 @@ const styles = StyleSheet.create({
     marginTop: 12,
     textTransform: 'uppercase',
   },
-  pathTemplate: {
+  pathTemplateAbove: {
     fontFamily: NEO.fontMono,
     fontSize: 13,
     color: NEO.text,
-    marginTop: 8,
+    marginTop: 12,
   },
   secretName: {
     fontFamily: NEO.fontUIBold,
@@ -514,12 +738,23 @@ const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 22,
   },
-  moreText: {
-    fontFamily: NEO.fontUI,
-    fontSize: 13,
+  addressHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 8,
+  },
+  addrPathRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+    marginTop: 4,
+  },
+  addrPath: {
+    fontFamily: NEO.fontMono,
+    fontSize: 11,
     color: '#999',
-    textAlign: 'center',
-    marginTop: 8,
+    flex: 1,
   },
   metaEntryRow: {
     flexDirection: 'row',
@@ -538,5 +773,35 @@ const styles = StyleSheet.create({
     fontFamily: NEO.fontMono,
     fontSize: 13,
     color: NEO.text,
+  },
+  pdfRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+  },
+  dupInput: {
+    fontFamily: NEO.fontUI,
+    fontSize: 15,
+    color: NEO.text,
+    borderWidth: 2,
+    borderColor: NEO.border,
+    padding: 10,
+    marginTop: 4,
+  },
+  dangerBox: {
+    backgroundColor: '#FFEAEA',
+    borderWidth: 2,
+    borderColor: '#CC0000',
+    padding: 16,
+    marginBottom: 16,
+  },
+  dangerText: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 14,
+    color: '#CC0000',
+    lineHeight: 22,
+  },
+  exportActions: {
+    marginTop: 8,
   },
 });
