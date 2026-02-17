@@ -41,13 +41,13 @@ export default function EntropyScreen() {
     },
     {
       key: 'finger' as const,
-      title: 'Finger Draw',
-      desc: 'Collect entropy from touch coordinates and timing, then hash to produce randomness.',
+      title: 'Motion',
+      desc: 'Collect entropy from accelerometer data as you move the device. Shake or wave your phone to generate randomness.',
     },
     {
       key: 'combined' as const,
       title: 'Combined',
-      desc: 'XOR finger-drawn entropy with system randomness for maximum unpredictability.',
+      desc: 'XOR motion entropy with system randomness for maximum unpredictability.',
     },
   ];
 
@@ -75,9 +75,9 @@ export default function EntropyScreen() {
         </View>
       ) : (
         <View>
-          <NeoCard title={mode === 'finger' ? 'Finger Draw' : 'Combined'}>
+          <NeoCard title={mode === 'finger' ? 'Motion' : 'Combined'}>
             <Text style={styles.optionDesc}>
-              Draw randomly on the canvas below to collect entropy.
+              Move your phone around to collect entropy from the accelerometer.
             </Text>
             <EntropyCanvas onEntropyReady={handleEntropyReady} />
           </NeoCard>

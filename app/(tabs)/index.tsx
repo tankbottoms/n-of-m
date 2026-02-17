@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, ScrollView, StyleSheet } from 'react-native';
+import { Text, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { NeoCard, NeoButton } from '../../components/neo';
 import { NEO } from '../../constants/theme';
 import { router } from 'expo-router';
@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 export default function HomeScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.appName}>n of m</Text>
       <Text style={styles.title}>SHAMIR</Text>
       <Text style={styles.subtitle}>Ethereum Seed Phrase Manager</Text>
 
@@ -34,13 +35,16 @@ export default function HomeScreen() {
         />
       </NeoCard>
 
-      <NeoCard title="How It Works" style={styles.card}>
-        <Text style={styles.text}>
-          Shamir's Secret Sharing splits your seed phrase into N shares,
-          requiring any M of them to reconstruct. Store shares in different
-          locations for redundancy and security.
-        </Text>
-      </NeoCard>
+      <Pressable onPress={() => router.push('/how-it-works')}>
+        <NeoCard title="How It Works" style={styles.card}>
+          <Text style={styles.text}>
+            Shamir's Secret Sharing splits your seed phrase into N shares,
+            requiring any M of them to reconstruct. Store shares in different
+            locations for redundancy and security.
+          </Text>
+          <Text style={styles.learnMore}>Tap to learn more →</Text>
+        </NeoCard>
+      </Pressable>
 
     </ScrollView>
   );
@@ -49,6 +53,14 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: NEO.bg },
   content: { padding: 16, paddingTop: 60, paddingBottom: 24 },
+  appName: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    letterSpacing: 3,
+    marginBottom: 2,
+  },
   title: {
     fontFamily: NEO.fontUIBold,
     fontSize: 36,
@@ -71,5 +83,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: NEO.text,
     lineHeight: 22,
+  },
+  learnMore: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 12,
+    color: '#666',
+    textTransform: 'uppercase',
+    marginTop: 12,
+    letterSpacing: 0.5,
   },
 });

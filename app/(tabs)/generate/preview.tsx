@@ -25,16 +25,16 @@ export default function PreviewScreen() {
     setGenerating(true);
     setError(null);
     try {
-      const uri = await generatePDF(shares, highlight, layoutType);
+      const uri = await generatePDF(shares, highlight, layoutType, state.firstAddress);
       update({ pdfUri: uri });
       router.push('/(tabs)/generate/share');
     } catch (err) {
-      console.error('PDF generation error:', err);
+      if (__DEV__) console.error('PDF generation error:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate PDF');
     } finally {
       setGenerating(false);
     }
-  }, [shares, highlight, layoutType, update]);
+  }, [shares, highlight, layoutType, state.firstAddress, update]);
 
   if (shares.length === 0) {
     return (

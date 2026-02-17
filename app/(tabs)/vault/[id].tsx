@@ -9,14 +9,19 @@ import {
   Pressable,
   TextInput,
 } from 'react-native';
+import { Buffer } from 'buffer';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { NeoCard, NeoButton, NeoBadge } from '../../../components/neo';
 import { MnemonicGrid } from '../../../components/MnemonicGrid';
 import { AddressRow } from '../../../components/AddressRow';
-import { NEO, SHADOW } from '../../../constants/theme';
+import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { useVault } from '../../../hooks/useVault';
 import { DERIVATION_PATHS } from '../../../constants/derivation';
+import { deriveAddresses } from '../../../lib/wallet';
+import { split } from '../../../lib/shamir';
+import { generatePDF, sharePDF } from '../../../lib/pdf/generate';
+import { PathType, SharePayload } from '../../../constants/types';
 
 function formatDate(ts: number): string {
   const d = new Date(ts);
@@ -38,9 +43,13 @@ export default function VaultDetailScreen() {
   const [deleting, setDeleting] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [editName, setEditName] = useState('');
+  const [deriving, setDeriving] = useState(false);
 
   const secret = secrets.find((s) => s.id === id);
   const isLocked = secret?.locked ?? false;
+
+  const [derivePathType, setDerivePathType] = useState<PathType>(secret?.pathType ?? 'metamask');
+  const [generatingPDF, setGeneratingPDF] = useState(false);
 
   const handleDelete = useCallback(() => {
     if (!secret) return;
@@ -91,6 +100,74 @@ export default function VaultDetailScreen() {
     setEditingName(false);
   }, [secret, editName, update]);
 
+  const handleDeriveMore = useCallback(async (count: number) => {
+    if (!secret) return;
+    setDeriving(true);
+    setTimeout(async () => {
+      try {
+        const startIndex = secret.addresses.length;
+        const totalNeeded = startIndex + count;
+        const allAddresses = deriveAddresses(
+          secret.mnemonic,
+          derivePathType,
+          totalNeeded,
+          derivePathType === 'custom' ? secret.derivationPath : undefined
+        );
+        const newAddresses = allAddresses.slice(startIndex);
+        await update(secret.id, {
+          addresses: [...secret.addresses, ...newAddresses],
+          addressCount: totalNeeded,
+        });
+      } catch (err) {
+        if (__DEV__) console.error('Derive error:', err);
+        Alert.alert('Error', 'Failed to derive addresses.');
+      }
+      setDeriving(false);
+    }, 50);
+  }, [secret, derivePathType, update]);
+
+  const handleDownloadPDF = useCallback(async () => {
+    if (!secret) return;
+    setGeneratingPDF(true);
+    try {
+      const secretBuffer = Buffer.from(secret.mnemonic);
+      const shares = split(secretBuffer, {
+        shares: secret.shamirConfig.totalShares,
+        threshold: secret.shamirConfig.threshold,
+      });
+      const sharePayloads: SharePayload[] = shares.map((shareBuf, i) => ({
+        v: 1 as const,
+        id: secret.id,
+        name: secret.name,
+        shareIndex: i + 1,
+        totalShares: secret.shamirConfig.totalShares,
+        threshold: secret.shamirConfig.threshold,
+        shareData: (shareBuf as Buffer).toString('hex'),
+        derivationPath: secret.derivationPath,
+        pathType: secret.pathType,
+        wordCount: secret.wordCount,
+        metadata: secret.metadata,
+        hasPIN: secret.hasPIN,
+        hasPassphrase: secret.hasPassphrase,
+      }));
+      const firstAddr = secret.addresses.length > 0 ? secret.addresses[0].address : undefined;
+      const uri = await generatePDF(sharePayloads, highlight, 'full-page', firstAddr);
+      await sharePDF(uri);
+    } catch (err) {
+      if (__DEV__) console.error('PDF error:', err);
+      Alert.alert('Error', 'Failed to generate PDF.');
+    }
+    setGeneratingPDF(false);
+  }, [secret, highlight]);
+
+  const handleTogglePin = useCallback(async (addrIndex: number) => {
+    if (!secret) return;
+    const updatedAddresses = secret.addresses.map((a) =>
+      a.index === addrIndex ? { ...a, pinned: !a.pinned } : a
+    );
+    await update(secret.id, { addresses: updatedAddresses });
+  }, [secret, update]);
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -124,31 +201,18 @@ export default function VaultDetailScreen() {
       : 'Custom';
 
   const words = secret.mnemonic.split(' ');
-  const displayAddresses = secret.addresses.slice(0, 10);
+  const displayAddresses = secret.addresses;
+  const sortedAddresses = [...displayAddresses].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return a.index - b.index;
+  });
 
   return (
     <>
       <Stack.Screen
         options={{
           title: secret.name,
-          headerRight: () => (
-            <View style={styles.headerActions}>
-              <Pressable onPress={handleToggleLock} style={styles.headerBtn}>
-                <Text style={styles.lockIcon}>
-                  {isLocked ? '\uF023' : '\uF09C'}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={handleDelete}
-                style={styles.headerBtn}
-                disabled={deleting}
-              >
-                <Text style={[styles.headerBtnText, { color: isLocked ? '#CCC' : '#CC0000' }]}>
-                  X
-                </Text>
-              </Pressable>
-            </View>
-          ),
         }}
       />
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -184,7 +248,12 @@ export default function VaultDetailScreen() {
               text={`${secret.shamirConfig.threshold} of ${secret.shamirConfig.totalShares} shares`}
               variant="dark"
             />
-            {isLocked && <NeoBadge text={'\uF023 LOCKED'} variant="outline" />}
+            <Pressable onPress={handleToggleLock}>
+              <NeoBadge
+                text={isLocked ? 'LOCKED' : 'UNLOCKED'}
+                variant={isLocked ? 'highlight' : 'outline'}
+              />
+            </Pressable>
           </View>
 
           <View style={styles.detailsGrid}>
@@ -227,20 +296,73 @@ export default function VaultDetailScreen() {
 
         {/* Addresses */}
         <NeoCard title="Derived Addresses" style={styles.section}>
-          {displayAddresses.length === 0 ? (
+          {sortedAddresses.length === 0 ? (
             <Text style={styles.bodyText}>No addresses derived.</Text>
           ) : (
             <>
-              {displayAddresses.map((addr) => (
-                <AddressRow key={addr.index} address={addr} />
+              {sortedAddresses.map((addr) => (
+                <AddressRow
+                  key={addr.index}
+                  address={addr}
+                  pinned={addr.pinned}
+                  onTogglePin={() => handleTogglePin(addr.index)}
+                />
               ))}
-              {secret.addresses.length > 10 && (
-                <Text style={styles.moreText}>
-                  + {secret.addresses.length - 10} more addresses
-                </Text>
-              )}
             </>
           )}
+        </NeoCard>
+
+        {/* Derive More Addresses */}
+        <NeoCard title="Derive More" style={styles.section}>
+          <Text style={styles.bodyText}>
+            Generate additional addresses from this seed phrase.
+          </Text>
+
+          <View style={{ marginTop: 12 }}>
+            <Text style={styles.detailLabel}>Path Type</Text>
+            <View style={styles.pathTypeRow}>
+              {(['metamask', 'ledger', 'custom'] as PathType[]).map((pt) => (
+                <NeoButton
+                  key={pt}
+                  title={DERIVATION_PATHS[pt].label}
+                  size="sm"
+                  variant={derivePathType === pt ? 'primary' : 'secondary'}
+                  onPress={() => setDerivePathType(pt)}
+                  style={{ marginRight: 8 }}
+                />
+              ))}
+            </View>
+          </View>
+
+          <Text style={styles.pathTemplate}>
+            {derivePathType === 'custom'
+              ? secret.derivationPath
+              : DERIVATION_PATHS[derivePathType].template.replace(
+                  '{index}',
+                  `${secret.addresses.length}...`
+                )}
+          </Text>
+
+          {deriving && (
+            <ActivityIndicator size="small" color={highlight} style={{ marginTop: 12 }} />
+          )}
+
+          <View style={{ marginTop: 16 }}>
+            <Text style={styles.detailLabel}>Generate</Text>
+            <View style={[styles.pathTypeRow, { marginTop: 6 }]}>
+              {[5, 10, 20].map((n) => (
+                <NeoButton
+                  key={n}
+                  title={`+${n}`}
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => handleDeriveMore(n)}
+                  disabled={deriving || isLocked}
+                  style={{ minWidth: 50 }}
+                />
+              ))}
+            </View>
+          </View>
         </NeoCard>
 
         {/* Metadata */}
@@ -254,6 +376,27 @@ export default function VaultDetailScreen() {
             ))}
           </NeoCard>
         )}
+
+        {/* Download PDF */}
+        <NeoButton
+          title={generatingPDF ? 'Generating PDF...' : 'Download PDF'}
+          onPress={handleDownloadPDF}
+          disabled={generatingPDF || isLocked}
+          variant="secondary"
+          style={{ marginTop: 24 }}
+        />
+        {generatingPDF && (
+          <ActivityIndicator size="small" color={highlight} style={{ marginTop: 8 }} />
+        )}
+
+        {/* Delete - at very bottom */}
+        <NeoButton
+          title="Delete Secret"
+          variant="danger"
+          onPress={handleDelete}
+          disabled={deleting || isLocked}
+          style={{ marginTop: 32, marginBottom: 20 }}
+        />
       </ScrollView>
     </>
   );
@@ -275,23 +418,11 @@ const styles = StyleSheet.create({
     marginTop: 12,
     textTransform: 'uppercase',
   },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  headerBtn: {
-    padding: 4,
-  },
-  headerBtnText: {
-    fontFamily: NEO.fontUIBold,
+  pathTemplate: {
+    fontFamily: NEO.fontMono,
     fontSize: 13,
     color: NEO.text,
-  },
-  lockIcon: {
-    fontFamily: NEO.fontIcon,
-    fontSize: 20,
-    color: NEO.text,
+    marginTop: 8,
   },
   secretName: {
     fontFamily: NEO.fontUIBold,
@@ -370,6 +501,12 @@ const styles = StyleSheet.create({
     color: '#856404',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  pathTypeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
   },
   bodyText: {
     fontFamily: NEO.fontUI,

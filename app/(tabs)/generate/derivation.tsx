@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { NeoButton, NeoCard, NeoInput } from '../../../components/neo';
+import { NeoButton, NeoCard } from '../../../components/neo';
 import { AddressRow } from '../../../components/AddressRow';
+import { PathSpinner } from '../../../components/PathSpinner';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 import { useGenerateFlow } from '../../../hooks/useGenerateFlow';
@@ -23,21 +24,28 @@ export default function DerivationScreen() {
   const [addressCount, setAddressCount] = useState<number>(state.addressCount);
   const [addresses, setAddresses] = useState<DerivedAddress[]>([]);
   const [derived, setDerived] = useState(false);
+  const [customPathIndex, setCustomPathIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const handleDerive = useCallback(() => {
     if (!mnemonic) return;
-    try {
-      const result = deriveAddresses(
-        mnemonic,
-        pathType,
-        addressCount,
-        pathType === 'custom' ? customPath : undefined
-      );
-      setAddresses(result);
-      setDerived(true);
-    } catch (err) {
-      console.error('Derivation error:', err);
-    }
+    setLoading(true);
+    // Use setTimeout to allow UI to update before CPU-bound work
+    setTimeout(() => {
+      try {
+        const result = deriveAddresses(
+          mnemonic,
+          pathType,
+          addressCount,
+          pathType === 'custom' ? customPath : undefined
+        );
+        setAddresses(result);
+        setDerived(true);
+      } catch (err) {
+        if (__DEV__) console.error('Derivation error:', err);
+      }
+      setLoading(false);
+    }, 50);
   }, [mnemonic, pathType, addressCount, customPath]);
 
   const handleContinue = useCallback(() => {
@@ -77,23 +85,31 @@ export default function DerivationScreen() {
         </View>
         <Text style={styles.pathDesc}>{currentPathInfo.description}</Text>
         {pathType !== 'custom' && (
-          <Text style={styles.pathTemplate}>{currentPathInfo.template}</Text>
+          <Text style={styles.pathTemplate}>
+            {currentPathInfo.template.replace('{index}', '0...' + String(addressCount - 1))}
+          </Text>
         )}
       </NeoCard>
 
       {pathType === 'custom' && (
-        <NeoInput
-          label="Custom Path"
-          value={customPath}
-          onChangeText={(text) => {
-            setCustomPath(text);
-            setDerived(false);
-            setAddresses([]);
-          }}
-          placeholder="m/44'/60'/0'/0/{index}"
-          mono
-          containerStyle={{ marginTop: 12 }}
-        />
+        <NeoCard title="Custom Path" style={{ marginTop: 12 }}>
+          <Text style={styles.pathTemplate}>
+            m/44'/60'/0'/0/
+            <Text style={{ color: highlight, fontWeight: '700' }}>{customPathIndex}</Text>
+          </Text>
+          <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Text style={styles.pathDesc}>Index:</Text>
+            <PathSpinner
+              value={customPathIndex}
+              onChange={setCustomPathIndex}
+              min={0}
+              max={999}
+            />
+          </View>
+          <Text style={[styles.pathDesc, { marginTop: 8 }]}>
+            Index range: 0 to {addressCount - 1}
+          </Text>
+        </NeoCard>
       )}
 
       <NeoCard title="Address Count" style={{ marginTop: 16 }}>
@@ -116,17 +132,56 @@ export default function DerivationScreen() {
       </NeoCard>
 
       <NeoButton
-        title="Derive Addresses"
+        title={loading ? 'Deriving...' : 'Derive Addresses'}
         onPress={handleDerive}
+        disabled={loading}
         style={{ marginTop: 16 }}
       />
+      {loading && (
+        <ActivityIndicator size="large" color={highlight} style={{ marginTop: 12 }} />
+      )}
 
       {derived && addresses.length > 0 && (
         <View style={styles.addressSection}>
           <NeoCard title={`${addresses.length} Addresses`}>
+            <Text style={styles.pathTemplate}>
+              {pathType === 'custom'
+                ? customPath.replace('{index}', `0...${addresses.length - 1}`)
+                : DERIVATION_PATHS[pathType].template.replace('{index}', `0...${addresses.length - 1}`)}
+            </Text>
+            <View style={{ height: 12 }} />
             {addresses.map((addr) => (
               <AddressRow key={addr.index} address={addr} />
             ))}
+            <View style={{ marginTop: 16 }}>
+              <Text style={styles.pathDesc}>Generate more:</Text>
+              <View style={[styles.row, { marginTop: 8 }]}>
+                {[5, 10, 20].map((n) => (
+                  <NeoButton
+                    key={n}
+                    title={`+${n}`}
+                    size="sm"
+                    variant="secondary"
+                    onPress={() => {
+                      if (!mnemonic) return;
+                      try {
+                        const newTotal = addresses.length + n;
+                        const result = deriveAddresses(
+                          mnemonic,
+                          pathType,
+                          newTotal,
+                          pathType === 'custom' ? customPath : undefined
+                        );
+                        setAddresses(result);
+                      } catch (err) {
+                        if (__DEV__) console.error('Derivation error:', err);
+                      }
+                    }}
+                    style={styles.countBtn}
+                  />
+                ))}
+              </View>
+            </View>
           </NeoCard>
 
           <NeoButton

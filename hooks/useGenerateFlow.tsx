@@ -15,6 +15,7 @@ interface GenerateFlowState {
   passphrase?: string;
   metadata?: Record<string, string>;
   shares: SharePayload[];
+  firstAddress?: string; // first derived address for card identification
   pdfUri?: string;
 }
 

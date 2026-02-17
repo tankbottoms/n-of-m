@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { NeoCard, NeoBadge } from '../../../components/neo';
+import { router } from 'expo-router';
+import { NeoCard, NeoButton, NeoBadge } from '../../../components/neo';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
 
@@ -10,6 +11,7 @@ export default function AboutScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.hero}>
+        <Text style={styles.brandName}>n of m</Text>
         <Text style={styles.appName}>SHAMIR</Text>
         <Text style={styles.tagline}>Ethereum Seed Phrase Manager</Text>
         <NeoBadge text="v1.0.0" variant="highlight" />
@@ -107,6 +109,19 @@ export default function AboutScreen() {
         </View>
       </NeoCard>
 
+      <NeoButton
+        title="How It Works"
+        variant="secondary"
+        onPress={() => router.push('/how-it-works')}
+        style={{ marginTop: 8 }}
+      />
+      <NeoButton
+        title="The Mathematics"
+        variant="secondary"
+        onPress={() => router.push('/how-it-works-math')}
+        style={{ marginTop: 8 }}
+      />
+
       <View style={styles.footer}>
         <Text style={styles.footerText}>
           Built with Expo, React Native, and ethers.js
@@ -122,6 +137,13 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     paddingVertical: 32,
+  },
+  brandName: {
+    fontFamily: NEO.fontUI,
+    fontSize: 16,
+    color: '#999',
+    letterSpacing: 2,
+    marginBottom: 2,
   },
   appName: {
     fontFamily: NEO.fontUIBold,
