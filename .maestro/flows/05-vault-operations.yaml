@@ -1,0 +1,60 @@
+appId: com.anonymous.ios-shamir
+---
+# ── Generate a secret (abbreviated) ──
+- launchApp:
+    clearState: true
+
+- tapOn: "New Secret"
+- waitForAnimationToEnd
+
+- tapOn: "Generate New Phrase"
+- waitForAnimationToEnd
+
+- tapOn: "Use System Only"
+- waitForAnimationToEnd
+
+- tapOn: "Generate"
+- waitForAnimationToEnd
+
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+- tapOn: "Derive Addresses"
+- waitForAnimationToEnd
+
+- tapOn: "Continue to Shamir"
+- waitForAnimationToEnd
+
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+- tapOn: "Generate Shares"
+- waitForAnimationToEnd
+
+- tapOn: "Generate PDF"
+- waitForAnimationToEnd
+
+- tapOn: "Save to Vault"
+- waitForAnimationToEnd
+- assertVisible: "Saved to Vault"
+
+- tapOn: "Done"
+- waitForAnimationToEnd
+
+# ── Vault list ──
+- tapOn: "Vault"
+- waitForAnimationToEnd
+
+# The secret should appear in the vault list
+- assertVisible: "24 words"
+- assertVisible: "2 of 3 shares"
+- takeScreenshot: vault-list
+
+# Tap the secret card (matches the badge text inside the card)
+- tapOn: "24 words"
+- waitForAnimationToEnd
+
+# ── Vault detail ──
+- assertVisible: "Seed Phrase"
+- assertVisible: "Derived Addresses"
+- takeScreenshot: vault-detail

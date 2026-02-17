@@ -12,6 +12,8 @@ import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { NeoCard, NeoButton, NeoInput, NeoBadge } from '../../../components/neo';
+
+const TEST_MODE = process.env.EXPO_PUBLIC_TEST_MODE === 'true';
 import { PathEditor } from '../../../components/PathEditor';
 import { NEO } from '../../../constants/theme';
 import { useTheme } from '../../../hooks/useTheme';
@@ -217,20 +219,22 @@ export default function SettingsScreen() {
                 return;
               }
               if (val) {
-                // Verify identity before enabling
-                const compatible = await LocalAuthentication.hasHardwareAsync();
-                const enrolled = compatible && await LocalAuthentication.isEnrolledAsync();
-                if (enrolled) {
-                  const result = await LocalAuthentication.authenticateAsync({
-                    promptMessage: 'Verify your identity to enable vault protection',
-                    disableDeviceFallback: false,
-                  });
-                  if (!result.success) {
-                    Alert.alert('Authentication Failed', 'Vault protection was not enabled.');
-                    return;
+                if (!TEST_MODE) {
+                  // Verify identity before enabling
+                  const compatible = await LocalAuthentication.hasHardwareAsync();
+                  const enrolled = compatible && await LocalAuthentication.isEnrolledAsync();
+                  if (enrolled) {
+                    const result = await LocalAuthentication.authenticateAsync({
+                      promptMessage: 'Verify your identity to enable vault protection',
+                      disableDeviceFallback: false,
+                    });
+                    if (!result.success) {
+                      Alert.alert('Authentication Failed', 'Vault protection was not enabled.');
+                      return;
+                    }
                   }
                 }
-                // If no biometrics, PIN is sufficient (already verified it's set)
+                // If test mode or no biometrics, PIN is sufficient
               }
               setVaultAuthRequired(val);
               await SecureStore.setItemAsync(VAULT_AUTH_KEY, val ? 'true' : 'false');

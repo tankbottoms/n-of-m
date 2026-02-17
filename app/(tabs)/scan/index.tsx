@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { NeoButton, NeoCard, NeoBadge } from '../../../components/neo';
@@ -11,6 +11,7 @@ import { useScanFlow } from '../../../hooks/useScanFlow';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const VIEWFINDER_SIZE = SCREEN_WIDTH * 0.7;
+const TEST_MODE = process.env.EXPO_PUBLIC_TEST_MODE === 'true';
 
 export default function ScanScreen() {
   const { highlight } = useTheme();
@@ -21,6 +22,7 @@ export default function ScanScreen() {
   const lastScannedRef = useRef<string>('');
   const cooldownRef = useRef(false);
   const navigatedRef = useRef(false);
+  const [testInput, setTestInput] = useState('');
 
   const handleBarCodeScanned = useCallback(({ data }: { data: string }) => {
     // Prevent duplicate scans with cooldown
@@ -66,8 +68,15 @@ export default function ScanScreen() {
     setScanning(true);
   }, [scanner]);
 
-  // Permission not yet determined
-  if (!permission) {
+  const handleTestScan = useCallback(() => {
+    if (testInput.trim()) {
+      handleBarCodeScanned({ data: testInput.trim() });
+      setTestInput('');
+    }
+  }, [testInput, handleBarCodeScanned]);
+
+  // Permission not yet determined (skip in test mode -- no camera needed)
+  if (!TEST_MODE && !permission) {
     return (
       <View style={styles.container}>
         <View style={styles.content}>
@@ -79,8 +88,8 @@ export default function ScanScreen() {
     );
   }
 
-  // Permission denied
-  if (!permission.granted) {
+  // Permission denied (skip in test mode)
+  if (!TEST_MODE && !permission?.granted) {
     return (
       <View style={styles.container}>
         <View style={styles.content}>
@@ -141,27 +150,49 @@ export default function ScanScreen() {
         </View>
       )}
 
-      {/* Camera viewfinder */}
-      <View style={styles.cameraContainer}>
-        <CameraView
-          style={styles.camera}
-          facing="back"
-          barcodeScannerSettings={{
-            barcodeTypes: ['qr'],
-          }}
-          onBarcodeScanned={handleBarCodeScanned}
-        />
-        {/* Viewfinder overlay - positioned above camera */}
-        <View style={styles.overlay} pointerEvents="none">
-          <View style={styles.overlayTop} />
-          <View style={styles.overlayMiddle}>
-            <View style={styles.overlaySide} />
-            <View style={[styles.viewfinder, { borderColor: highlight }]} />
-            <View style={styles.overlaySide} />
-          </View>
-          <View style={styles.overlayBottom} />
+      {/* Camera viewfinder / Test mode input */}
+      {TEST_MODE ? (
+        <View style={styles.testInputContainer}>
+          <Text style={styles.testModeLabel}>TEST MODE</Text>
+          <TextInput
+            testID="test-scan-input"
+            style={styles.testInput}
+            value={testInput}
+            onChangeText={setTestInput}
+            placeholder="Paste SharePayload JSON here..."
+            placeholderTextColor="#999"
+            multiline
+            numberOfLines={4}
+          />
+          <NeoButton
+            testID="test-scan-submit"
+            title="Inject Scan"
+            onPress={handleTestScan}
+            style={{ marginTop: 12 }}
+          />
         </View>
-      </View>
+      ) : (
+        <View style={styles.cameraContainer}>
+          <CameraView
+            style={styles.camera}
+            facing="back"
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr'],
+            }}
+            onBarcodeScanned={handleBarCodeScanned}
+          />
+          {/* Viewfinder overlay - positioned above camera */}
+          <View style={styles.overlay} pointerEvents="none">
+            <View style={styles.overlayTop} />
+            <View style={styles.overlayMiddle}>
+              <View style={styles.overlaySide} />
+              <View style={[styles.viewfinder, { borderColor: highlight }]} />
+              <View style={styles.overlaySide} />
+            </View>
+            <View style={styles.overlayBottom} />
+          </View>
+        </View>
+      )}
 
       {/* Error display */}
       {scanner.error && (
@@ -280,5 +311,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: NEO.text,
     textAlign: 'center',
+  },
+  testInputContainer: {
+    flex: 1,
+    padding: 16,
+    justifyContent: 'center',
+  },
+  testModeLabel: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 12,
+    color: '#CC6600',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  testInput: {
+    fontFamily: NEO.fontMono,
+    fontSize: 13,
+    color: NEO.text,
+    borderWidth: NEO.borderWidth,
+    borderColor: NEO.border,
+    padding: 12,
+    minHeight: 120,
+    textAlignVertical: 'top',
+    backgroundColor: '#FAFAFA',
   },
 });

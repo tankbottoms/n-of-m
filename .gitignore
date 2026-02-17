@@ -47,6 +47,7 @@ yarn-error.*
 # env files
 .env
 .env.*
+!.env.test
 
 # editor
 .idea/
@@ -56,3 +57,6 @@ yarn-error.*
 
 # large media (use docs/images/ compressed versions instead)
 assets/images/screenshots/walkthrough.mp4
+
+# Maestro test output
+.maestro/screenshots/

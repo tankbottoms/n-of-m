@@ -1,0 +1,12 @@
+appId: com.anonymous.ios-shamir
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "SHAMIR"
+- assertVisible: "Ethereum Seed Phrase Manager"
+- assertVisible: "New Secret"
+- assertVisible: "Scan Shares"
+- assertVisible: "How It Works"
+
+- takeScreenshot: home-screen

@@ -1,0 +1,123 @@
+appId: com.anonymous.ios-shamir
+---
+# ── Full app walkthrough with screenshots at every screen ──
+
+# 1. Home
+- launchApp:
+    clearState: true
+
+- assertVisible: "SHAMIR"
+- assertVisible: "New Secret"
+- takeScreenshot: demo-01-home
+
+# 2. Generate menu
+- tapOn: "New Secret"
+- waitForAnimationToEnd
+- takeScreenshot: demo-02-generate-menu
+
+# 3. Entropy screen
+- tapOn: "Generate New Phrase"
+- waitForAnimationToEnd
+- takeScreenshot: demo-03-entropy
+
+# 4. Mnemonic (blank, before generation)
+- tapOn: "Use System Only"
+- waitForAnimationToEnd
+- takeScreenshot: demo-04-mnemonic-blank
+
+# 5. Mnemonic with words
+- tapOn: "Generate"
+- waitForAnimationToEnd
+- assertVisible: "24-Word Mnemonic"
+- takeScreenshot: demo-05-mnemonic-words
+
+# 6. Derivation screen
+- tapOn: "Continue"
+- waitForAnimationToEnd
+- assertVisible: "Derivation Path"
+- takeScreenshot: demo-06-derivation
+
+# 7. Addresses shown
+- tapOn: "Derive Addresses"
+- waitForAnimationToEnd
+- assertVisible: "Addresses"
+- takeScreenshot: demo-07-addresses
+
+# 8. Shamir config
+- tapOn: "Continue to Shamir"
+- waitForAnimationToEnd
+- assertVisible: "Shamir Split"
+- takeScreenshot: demo-08-shamir-config
+
+# 9. Metadata
+- tapOn: "Continue"
+- waitForAnimationToEnd
+- assertVisible: "Metadata"
+- takeScreenshot: demo-09-metadata
+
+# 10. Preview
+- tapOn: "Generate Shares"
+- waitForAnimationToEnd
+- assertVisible: "Preview"
+- assertVisible: "1 OF 3"
+- takeScreenshot: demo-10-preview
+
+# 11. Share screen (PDF generated)
+- tapOn: "Generate PDF"
+- waitForAnimationToEnd
+- assertVisible: "PDF Ready"
+- assertVisible: "[DONE]"
+- takeScreenshot: demo-11-share
+
+# 12. Saved confirmation
+- tapOn: "Save to Vault"
+- waitForAnimationToEnd
+- assertVisible: "Saved to Vault"
+- takeScreenshot: demo-12-saved
+
+# 13. Done -> back to generate
+- tapOn: "Done"
+- waitForAnimationToEnd
+
+# 14. Vault list
+- tapOn: "Vault"
+- waitForAnimationToEnd
+- assertVisible: "24 words"
+- takeScreenshot: demo-13-vault-list
+
+# 15. Vault detail
+- tapOn: "24 words"
+- waitForAnimationToEnd
+- assertVisible: "Seed Phrase"
+- assertVisible: "Derived Addresses"
+- takeScreenshot: demo-14-vault-detail
+
+# 16. Back to vault list
+- back
+- waitForAnimationToEnd
+
+# 17. Settings
+- tapOn: "Settings"
+- waitForAnimationToEnd
+- assertVisible: "Settings"
+- assertVisible: "PIN Protection"
+- takeScreenshot: demo-15-settings
+
+# 18. Theme screen
+- scrollDown
+- tapOn: "Theme"
+- waitForAnimationToEnd
+- assertVisible: "Color Palette"
+- takeScreenshot: demo-16-theme
+
+# 19. Back to settings
+- back
+- waitForAnimationToEnd
+
+# 20. About screen
+- scrollDown
+- tapOn: "About"
+- waitForAnimationToEnd
+- assertVisible: "SHAMIR"
+- assertVisible: "Ethereum Seed Phrase Manager"
+- takeScreenshot: demo-17-about

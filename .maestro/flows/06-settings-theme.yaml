@@ -1,0 +1,39 @@
+appId: com.anonymous.ios-shamir
+---
+- launchApp:
+    clearState: true
+
+# ── Settings ──
+- tapOn: "Settings"
+- waitForAnimationToEnd
+
+- assertVisible: "Settings"
+- assertVisible: "PIN Protection"
+- assertVisible: "No PIN"
+- assertVisible: "Default Values"
+- assertVisible: "Word Count"
+- takeScreenshot: settings-main
+
+# Change word count default to 12
+- tapOn: "12"
+
+# ── Theme ──
+- scrollDown
+- tapOn: "Theme"
+- waitForAnimationToEnd
+
+- assertVisible: "Theme"
+- assertVisible: "Color Palette"
+- assertVisible: "Border Thickness"
+- takeScreenshot: settings-theme
+
+- back
+
+# ── About ──
+- scrollDown
+- tapOn: "About"
+- waitForAnimationToEnd
+
+- assertVisible: "SHAMIR"
+- assertVisible: "Ethereum Seed Phrase Manager"
+- takeScreenshot: settings-about
