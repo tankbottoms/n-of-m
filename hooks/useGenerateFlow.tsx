@@ -17,6 +17,7 @@ interface GenerateFlowState {
   shares: SharePayload[];
   firstAddress?: string; // first derived address for card identification
   pdfUri?: string;
+  pinnedAddresses: number[];
 }
 
 interface GenerateFlowContextValue {
@@ -34,6 +35,7 @@ const initial: GenerateFlowState = {
   totalShares: 5,
   name: '',
   shares: [],
+  pinnedAddresses: [],
 };
 
 const GenerateFlowContext = createContext<GenerateFlowContextValue | null>(null);

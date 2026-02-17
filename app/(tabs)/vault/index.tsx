@@ -64,10 +64,10 @@ export default function VaultScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>Vault</Text>
-      <Text style={styles.subtitle}>
-        {secrets.length} secret{secrets.length !== 1 ? 's' : ''} saved
-      </Text>
+      <View style={styles.headingRow}>
+        <Text style={styles.heading}>Vault</Text>
+        <NeoBadge text={String(secrets.length)} variant="highlight" />
+      </View>
 
       {secrets.map((secret) => {
         const pathLabel =
@@ -144,20 +144,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  headingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   heading: {
     fontFamily: NEO.fontUIBold,
     fontSize: 24,
     color: NEO.text,
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontFamily: NEO.fontUI,
-    fontSize: 15,
-    color: '#666',
-    marginBottom: 20,
-    lineHeight: 22,
   },
   loadingText: {
     fontFamily: NEO.fontUI,

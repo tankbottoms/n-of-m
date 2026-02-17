@@ -6,8 +6,9 @@ import { useTheme } from '../../hooks/useTheme';
 import { NEO, SHADOW } from '../../constants/theme';
 import Constants from 'expo-constants';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { APP_VERSION as VERSION_CONST } from '../../constants/version';
 
-const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
+const APP_VERSION = Constants.expoConfig?.version ?? VERSION_CONST;
 const BUILD_NUMBER = String((Constants.expoConfig?.extra as Record<string, unknown>)?.buildNumber ?? '');
 
 const TAB_LABELS: Record<string, string> = {

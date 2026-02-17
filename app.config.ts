@@ -1,6 +1,7 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 import buildData from './build-number.json';
 
+// Keep in sync with constants/version.ts (can't import TS from Expo config eval)
 const version = '1.0.0';
 const buildNumber = String(buildData.build);
 
