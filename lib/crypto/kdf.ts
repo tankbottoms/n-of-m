@@ -1,9 +1,11 @@
 import * as ExpoCrypto from 'expo-crypto';
 
+const KDF_ITERATIONS = 10_000;
+
 export async function deriveKey(pin: string, salt: string): Promise<string> {
   let derived = pin + salt;
-  // Iterate SHA-256 for key stretching
-  for (let i = 0; i < 1000; i++) {
+  // Iterate SHA-256 for key stretching (OWASP minimum: 10,000)
+  for (let i = 0; i < KDF_ITERATIONS; i++) {
     derived = await ExpoCrypto.digestStringAsync(
       ExpoCrypto.CryptoDigestAlgorithm.SHA256,
       derived

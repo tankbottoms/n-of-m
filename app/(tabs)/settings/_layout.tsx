@@ -14,6 +14,11 @@ export default function SettingsLayout() {
         } as Record<string, unknown>,
         headerBackTitle: 'Back',
       }}
-    />
+    >
+      <Stack.Screen name="index" options={{ title: 'SETTINGS' }} />
+      <Stack.Screen name="theme" options={{ title: 'THEME' }} />
+      <Stack.Screen name="layout" options={{ title: 'PDF LAYOUT' }} />
+      <Stack.Screen name="about" options={{ title: 'ABOUT' }} />
+    </Stack>
   );
 }

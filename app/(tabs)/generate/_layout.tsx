@@ -16,7 +16,16 @@ export default function GenerateLayout() {
           } as Record<string, unknown>,
           headerBackTitle: 'Back',
         }}
-      />
+      >
+        <Stack.Screen name="index" options={{ title: 'GENERATE' }} />
+        <Stack.Screen name="entropy" options={{ title: 'ENTROPY' }} />
+        <Stack.Screen name="mnemonic" options={{ title: 'MNEMONIC' }} />
+        <Stack.Screen name="derivation" options={{ title: 'DERIVATION' }} />
+        <Stack.Screen name="shamir" options={{ title: 'SHAMIR SPLIT' }} />
+        <Stack.Screen name="metadata" options={{ title: 'METADATA' }} />
+        <Stack.Screen name="preview" options={{ title: 'PREVIEW' }} />
+        <Stack.Screen name="share" options={{ title: 'SHARE' }} />
+      </Stack>
     </GenerateFlowProvider>
   );
 }

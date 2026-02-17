@@ -8,6 +8,7 @@ import Constants from 'expo-constants';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
+const BUILD_NUMBER = String((Constants.expoConfig?.extra as Record<string, unknown>)?.buildNumber ?? '');
 
 const TAB_LABELS: Record<string, string> = {
   index: 'Home',
@@ -65,7 +66,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       {/* Border line below buttons */}
       <View style={styles.separator} />
       {/* Version below the line */}
-      <Text style={styles.versionText}>v{APP_VERSION}</Text>
+      <Text style={styles.versionText}>v{APP_VERSION} ({BUILD_NUMBER})</Text>
     </View>
   );
 }

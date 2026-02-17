@@ -23,7 +23,7 @@
 **Step 1: Create Expo project with TypeScript template**
 
 ```bash
-cd /Users/mark.phillips/Developer
+cd ~/Developer
 npx create-expo-app@latest ios-shamir --template tabs
 ```
 
@@ -32,7 +32,7 @@ Note: project directory already exists with `docs/`. If create-expo-app complain
 **Step 2: Verify project runs**
 
 ```bash
-cd /Users/mark.phillips/Developer/ios-shamir
+cd ios-shamir
 npx expo start
 ```
 
@@ -55,7 +55,7 @@ git commit -m "Initialize Expo project with tabs template"
 **Step 1: Install core dependencies**
 
 ```bash
-cd /Users/mark.phillips/Developer/ios-shamir
+cd ios-shamir
 npx expo install expo-camera expo-crypto expo-file-system expo-font expo-secure-store expo-sharing expo-print
 npm install ethers@^6.13.0 react-native-qrcode-svg react-native-svg react-native-get-random-values buffer uuid
 npm install -D @types/uuid

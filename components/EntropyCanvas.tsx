@@ -1,5 +1,7 @@
-import React, { useRef, useState, useCallback } from 'react';
-import { View, StyleSheet, PanResponder, Text } from 'react-native';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
+import { Accelerometer } from 'expo-sensors';
+import * as ExpoCrypto from 'expo-crypto';
 import { NEO } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
 
@@ -13,36 +15,57 @@ export function EntropyCanvas({ onEntropyReady, requiredPoints = 200 }: EntropyC
   const [count, setCount] = useState(0);
   const [ready, setReady] = useState(false);
   const pointsRef = useRef<string[]>([]);
+  const subscriptionRef = useRef<ReturnType<typeof Accelerometer.addListener> | null>(null);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (_, gs) => {
-        if (ready) return;
-        const pt = `${gs.moveX}:${gs.moveY}:${Date.now()}`;
-        pointsRef.current.push(pt);
-        const newCount = pointsRef.current.length;
-        setCount(newCount);
-        if (newCount >= requiredPoints) {
-          setReady(true);
-          const data = pointsRef.current.join('|');
-          const encoded = new TextEncoder().encode(data);
-          crypto.subtle.digest('SHA-256', encoded).then(hash => {
-            onEntropyReady(new Uint8Array(hash));
-          });
-        }
-      },
-    })
-  ).current;
+  useEffect(() => {
+    Accelerometer.setUpdateInterval(50); // 20 readings per second
+
+    subscriptionRef.current = Accelerometer.addListener(({ x, y, z }) => {
+      if (pointsRef.current.length >= requiredPoints) return;
+
+      const pt = `${x.toFixed(6)}:${y.toFixed(6)}:${z.toFixed(6)}:${Date.now()}`;
+      pointsRef.current.push(pt);
+      const newCount = pointsRef.current.length;
+      setCount(newCount);
+
+      if (newCount >= requiredPoints && !ready) {
+        setReady(true);
+        // Unsubscribe immediately
+        subscriptionRef.current?.remove();
+        subscriptionRef.current = null;
+
+        const data = pointsRef.current.join('|');
+        ExpoCrypto.digestStringAsync(
+          ExpoCrypto.CryptoDigestAlgorithm.SHA256,
+          data,
+          { encoding: ExpoCrypto.CryptoEncoding.BASE64 }
+        ).then(hashB64 => {
+          const binary = atob(hashB64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          onEntropyReady(bytes);
+        });
+      }
+    });
+
+    return () => {
+      subscriptionRef.current?.remove();
+      subscriptionRef.current = null;
+    };
+  }, [requiredPoints, onEntropyReady, ready]);
 
   const progress = Math.min(count / requiredPoints, 1);
 
   return (
     <View style={styles.container}>
-      <View style={styles.canvas} {...panResponder.panHandlers}>
+      <View style={styles.canvas}>
         <Text style={styles.instruction}>
-          {ready ? 'ENTROPY COLLECTED' : 'MOVE YOUR FINGER RANDOMLY'}
+          {ready ? 'ENTROPY COLLECTED' : 'MOVE YOUR PHONE AROUND'}
+        </Text>
+        <Text style={styles.hint}>
+          {ready ? '' : 'Shake, tilt, or wave your device'}
         </Text>
       </View>
       <View style={styles.progressOuter}>
@@ -73,6 +96,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
     textTransform: 'uppercase',
+  },
+  hint: {
+    fontFamily: NEO.fontUI,
+    fontSize: 13,
+    color: '#BBB',
+    marginTop: 8,
   },
   progressOuter: {
     height: 8,

@@ -16,7 +16,11 @@ export default function ScanLayout() {
           } as Record<string, unknown>,
           headerBackTitle: 'Back',
         }}
-      />
+      >
+        <Stack.Screen name="index" options={{ title: 'SCAN' }} />
+        <Stack.Screen name="pin" options={{ title: 'ENTER PIN' }} />
+        <Stack.Screen name="result" options={{ title: 'RESULT' }} />
+      </Stack>
     </ScanFlowProvider>
   );
 }

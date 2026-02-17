@@ -53,3 +53,6 @@ yarn-error.*
 *.swp
 *.swo
 *~
+
+# large media (use docs/images/ compressed versions instead)
+assets/images/screenshots/walkthrough.mp4
