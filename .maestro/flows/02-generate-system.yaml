@@ -1,0 +1,62 @@
+appId: com.anonymous.ios-shamir
+---
+# ── Home ──
+- launchApp:
+    clearState: true
+
+- tapOn: "New Secret"
+- waitForAnimationToEnd
+
+# ── Generate Menu ──
+- tapOn: "Generate New Phrase"
+- waitForAnimationToEnd
+
+# ── Entropy ──
+- tapOn: "Use System Only"
+- waitForAnimationToEnd
+
+# ── Mnemonic ──
+- assertVisible: "Seed Phrase"
+- tapOn: "Generate"
+- waitForAnimationToEnd
+- assertVisible: "24-Word Mnemonic"
+- takeScreenshot: mnemonic-screen
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+# ── Derivation ──
+- assertVisible: "Derivation Path"
+- tapOn: "Derive Addresses"
+- waitForAnimationToEnd
+- assertVisible: "Addresses"
+- takeScreenshot: derivation-screen
+- tapOn: "Continue to Shamir"
+- waitForAnimationToEnd
+
+# ── Shamir Split ──
+- assertVisible: "Shamir Split"
+- takeScreenshot: shamir-screen
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+# ── Metadata ──
+- assertVisible: "Metadata"
+- tapOn: "Generate Shares"
+- waitForAnimationToEnd
+- takeScreenshot: metadata-screen
+
+# ── Preview ──
+- assertVisible: "Preview"
+- assertVisible: "1 OF 3"
+- takeScreenshot: preview-screen
+- tapOn: "Generate PDF"
+- waitForAnimationToEnd
+
+# ── Share / Save ──
+- assertVisible: "PDF Ready"
+- assertVisible: "[DONE]"
+- takeScreenshot: pdf-ready-screen
+- tapOn: "Save to Vault"
+- waitForAnimationToEnd
+- assertVisible: "Saved to Vault"
+- takeScreenshot: saved-to-vault-screen

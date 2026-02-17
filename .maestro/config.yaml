@@ -1,0 +1,5 @@
+# Maestro E2E test configuration for n-of-m
+#
+# IMPORTANT: Update appId after running `npx expo prebuild --platform ios`
+# Check: grep PRODUCT_BUNDLE_IDENTIFIER ios/*.xcodeproj/project.pbxproj
+appId: com.anonymous.ios-shamir

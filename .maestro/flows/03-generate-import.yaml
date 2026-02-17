@@ -1,0 +1,56 @@
+appId: com.anonymous.ios-shamir
+---
+# ── Home ──
+- launchApp:
+    clearState: true
+
+- tapOn: "New Secret"
+- waitForAnimationToEnd
+
+# ── Generate Menu ──
+- tapOn: "Import Phrase"
+- waitForAnimationToEnd
+
+# ── Import Phrase ──
+- assertVisible: "Import Phrase"
+- tapOn: "Validate"
+- waitForAnimationToEnd
+- assertVisible: "Valid BIP39 Mnemonic"
+- takeScreenshot: import-validated-screen
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+# ── Derivation ──
+- assertVisible: "Derivation Path"
+- tapOn: "Derive Addresses"
+- waitForAnimationToEnd
+- assertVisible: "Addresses"
+- takeScreenshot: import-derivation-screen
+- tapOn: "Continue to Shamir"
+- waitForAnimationToEnd
+
+# ── Shamir Split ──
+- assertVisible: "Shamir Split"
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+# ── Metadata ──
+- assertVisible: "Metadata"
+- tapOn: "Generate Shares"
+- waitForAnimationToEnd
+
+# ── Preview ──
+- assertVisible: "Preview"
+- assertVisible: "1 OF 3"
+- takeScreenshot: import-preview-screen
+- tapOn: "Generate PDF"
+- waitForAnimationToEnd
+
+# ── Share / Save ──
+- assertVisible: "PDF Ready"
+- assertVisible: "[DONE]"
+- takeScreenshot: import-pdf-ready-screen
+- tapOn: "Save to Vault"
+- waitForAnimationToEnd
+- assertVisible: "Saved to Vault"
+- takeScreenshot: import-saved-to-vault-screen

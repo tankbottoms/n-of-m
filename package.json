@@ -9,7 +9,15 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "test:e2e": "maestro test .maestro/flows/",
+    "test:e2e:home": "maestro test .maestro/flows/01-home.yaml",
+    "test:e2e:generate": "maestro test .maestro/flows/02-generate-system.yaml",
+    "test:e2e:import": "maestro test .maestro/flows/03-generate-import.yaml",
+    "test:e2e:scan": "maestro test .maestro/flows/04-scan-recover.yaml",
+    "test:e2e:vault": "maestro test .maestro/flows/05-vault-operations.yaml",
+    "test:e2e:settings": "maestro test .maestro/flows/06-settings-theme.yaml",
+    "test:e2e:demo": "maestro test .maestro/flows/demo-walkthrough.yaml"
   },
   "dependencies": {
     "@expo-google-fonts/space-grotesk": "^0.4.1",

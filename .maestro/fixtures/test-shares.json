@@ -1,0 +1,49 @@
+{
+  "mnemonic": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+  "threshold": 2,
+  "totalShares": 3,
+  "shares": [
+    {
+      "v": 1,
+      "id": "test-e2e-001",
+      "name": "E2E Test",
+      "shareIndex": 1,
+      "totalShares": 3,
+      "threshold": 2,
+      "shareData": "08011fbdda71f537706dd7f9f75ebe1f510ac4df08519d2fd93a92da54782b558b2b71857cfd1dc561ce3e7e3f3e0dfb23ffcb6475b63ef3c0753ab3f67e08d9b45a2ffe374d15ddb51a2d982680de00ec8d6a91716c5ac833a4d6a14bf18138554f160c5a7f4b34d93ebad0efbeec23358be7a001849e97a1a10aa8682d8baad770f02ed655142f79a88d91bffae2f60ddf80acaf105ace7ce7580ebf9afa318aef2b20a1151a5db2ca384b4b0c5302048f2c137c325e172d273b0ea558ee14f7d0",
+      "derivationPath": "m/44'/60'/0'/0",
+      "pathType": "metamask",
+      "wordCount": 12,
+      "hasPIN": false,
+      "hasPassphrase": false
+    },
+    {
+      "v": 1,
+      "id": "test-e2e-001",
+      "name": "E2E Test",
+      "shareIndex": 2,
+      "totalShares": 3,
+      "threshold": 2,
+      "shareData": "08023e67a9e2f76de046b370f30d6198a2b795c3101027efafd8391ba853560c0bf5e277f8553a26c22d7c4e7edf1a4d46408ba8eac37c4a9d4674c9f15f100975175e816e282a1677985a9f4cbea1a6c5a4d45fe26ab43c66f9b1ed965c1fd6aa3d2c78b44c96d9afd0690fc3c2c5e06aa8d33d02a721825ff314ffd0f90befb343fd3cb11828eff2e1078d634ad9571a001d254392b430f87fb0ae638ae9c4096056205f98340b7925702496bba6a208a05846f8d6bc9f5ae276ae5713c18ef31e",
+      "derivationPath": "m/44'/60'/0'/0",
+      "pathType": "metamask",
+      "wordCount": 12,
+      "hasPIN": false,
+      "hasPassphrase": false
+    },
+    {
+      "v": 1,
+      "id": "test-e2e-001",
+      "name": "E2E Test",
+      "shareIndex": 3,
+      "totalShares": 3,
+      "threshold": 2,
+      "shareData": "080321da7393025b905f64fc043cdfe5f3dc513c182fbaaf7686abaffc4a7d3b80bf93d284c6278ca387425e418017d465de40ec9f1b42d65d574e14074018b2c12c715f590b3fa4c2e677696a5f7fc42948beee9368ee9b55396722ddcc9e8cff133a54ee5ddd82768ad3b12c1d29a15f4234bd034dbf7afe361e39b8b5802764520d3267233caf8b2d8a72dcd13bc317be9da9ececee9184fce8cedc71139783ee7d20fee32e39cb8b4801ddd6f5c20c4e7475848ae2e777a14dcef22a2ff804af",
+      "derivationPath": "m/44'/60'/0'/0",
+      "pathType": "metamask",
+      "wordCount": 12,
+      "hasPIN": false,
+      "hasPassphrase": false
+    }
+  ]
+}
