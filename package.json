@@ -3,7 +3,9 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
+    "prestart": "node scripts/bump-build.js",
     "start": "expo start",
+    "prebuild": "node scripts/bump-build.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
