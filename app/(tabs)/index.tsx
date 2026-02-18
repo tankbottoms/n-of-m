@@ -35,7 +35,7 @@ export default function HomeScreen() {
         />
       </NeoCard>
 
-      <Pressable onPress={() => router.push('/how-it-works')}>
+      <Pressable onPress={() => router.push('/how-it-works')} testID="how-it-works-link" accessibilityLabel="How It Works">
         <NeoCard title="How It Works" style={styles.card}>
           <Text style={styles.text}>
             Shamir's Secret Sharing splits your seed phrase into N shares,

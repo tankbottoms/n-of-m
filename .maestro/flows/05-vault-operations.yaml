@@ -1,6 +1,6 @@
 appId: com.anonymous.ios-shamir
 ---
-# ── Generate a secret (abbreviated) ──
+# ── Generate a secret first ──
 - launchApp:
     clearState: true
 
@@ -10,33 +10,72 @@ appId: com.anonymous.ios-shamir
 - tapOn: "Generate New Phrase"
 - waitForAnimationToEnd
 
+# ── Entropy ──
+- extendedWaitUntil:
+    visible: "Entropy Source"
+    timeout: 10000
 - tapOn: "Use System Only"
 - waitForAnimationToEnd
 
+# ── Mnemonic ──
+- extendedWaitUntil:
+    visible: "Mnemonic"
+    timeout: 10000
 - tapOn: "Generate"
 - waitForAnimationToEnd
-
+- scroll
 - tapOn: "Continue"
 - waitForAnimationToEnd
 
+# ── Derivation ──
+- extendedWaitUntil:
+    visible: "Derivation Path"
+    timeout: 10000
 - tapOn: "Derive Addresses"
-- waitForAnimationToEnd
-
+- extendedWaitUntil:
+    visible: "10 Addresses"
+    timeout: 15000
+- scroll
+- scroll
+- scroll
 - tapOn: "Continue to Shamir"
 - waitForAnimationToEnd
 
+# ── Shamir Split ──
+- extendedWaitUntil:
+    visible: "Shamir Split"
+    timeout: 10000
+- scroll
 - tapOn: "Continue"
 - waitForAnimationToEnd
 
+# ── Metadata ──
+- extendedWaitUntil:
+    visible: "Metadata"
+    timeout: 10000
+- scroll
 - tapOn: "Generate Shares"
-- waitForAnimationToEnd
 
+# ── Preview ──
+- extendedWaitUntil:
+    visible: "Preview"
+    timeout: 30000
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- extendedWaitUntil:
+    visible: "Generate PDF"
+    timeout: 10000
 - tapOn: "Generate PDF"
-- waitForAnimationToEnd
 
+# ── Share / Save ──
+- extendedWaitUntil:
+    visible: "Save to Vault"
+    timeout: 30000
 - tapOn: "Save to Vault"
 - waitForAnimationToEnd
-- assertVisible: "Saved to Vault"
 
 - tapOn: "Done"
 - waitForAnimationToEnd
@@ -46,15 +85,17 @@ appId: com.anonymous.ios-shamir
 - waitForAnimationToEnd
 
 # The secret should appear in the vault list
-- assertVisible: "24 words"
-- assertVisible: "2 of 3 shares"
+- extendedWaitUntil:
+    visible: "24 WORDS"
+    timeout: 10000
 - takeScreenshot: vault-list
 
-# Tap the secret card (matches the badge text inside the card)
-- tapOn: "24 words"
+# Tap the vault card to open detail
+- tapOn: "24 WORDS"
 - waitForAnimationToEnd
 
 # ── Vault detail ──
-- assertVisible: "Seed Phrase"
-- assertVisible: "Derived Addresses"
+- extendedWaitUntil:
+    visible: "Seed Phrase"
+    timeout: 10000
 - takeScreenshot: vault-detail

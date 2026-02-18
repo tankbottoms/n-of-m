@@ -340,6 +340,8 @@ export default function SettingsScreen() {
         <Pressable
           style={styles.linkRow}
           onPress={() => router.push('/(tabs)/settings/theme')}
+          testID="settings-theme-link"
+          accessibilityLabel="Theme"
         >
           <Text style={styles.linkText}>Theme</Text>
           <Text style={styles.linkArrow}>→</Text>
@@ -347,6 +349,8 @@ export default function SettingsScreen() {
         <Pressable
           style={styles.linkRow}
           onPress={() => router.push('/(tabs)/settings/layout')}
+          testID="settings-layout-link"
+          accessibilityLabel="PDF Layout"
         >
           <Text style={styles.linkText}>PDF Layout</Text>
           <Text style={styles.linkArrow}>→</Text>
@@ -354,6 +358,8 @@ export default function SettingsScreen() {
         <Pressable
           style={[styles.linkRow, styles.linkRowLast]}
           onPress={() => router.push('/(tabs)/settings/about')}
+          testID="settings-about-link"
+          accessibilityLabel="About"
         >
           <Text style={styles.linkText}>About</Text>
           <Text style={styles.linkArrow}>→</Text>

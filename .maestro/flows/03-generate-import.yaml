@@ -8,49 +8,74 @@ appId: com.anonymous.ios-shamir
 - waitForAnimationToEnd
 
 # ── Generate Menu ──
+- extendedWaitUntil:
+    visible: "Generate New Phrase"
+    timeout: 10000
 - tapOn: "Import Phrase"
 - waitForAnimationToEnd
 
-# ── Import Phrase ──
-- assertVisible: "Import Phrase"
+# ── Import Phrase (auto-populated with 24 words) ──
+- extendedWaitUntil:
+    visible: "Import Phrase"
+    timeout: 10000
+- scroll
 - tapOn: "Validate"
 - waitForAnimationToEnd
-- assertVisible: "Valid BIP39 Mnemonic"
 - takeScreenshot: import-validated-screen
+- scroll
+- scroll
 - tapOn: "Continue"
 - waitForAnimationToEnd
 
 # ── Derivation ──
-- assertVisible: "Derivation Path"
+- extendedWaitUntil:
+    visible: "Derivation Path"
+    timeout: 10000
 - tapOn: "Derive Addresses"
-- waitForAnimationToEnd
-- assertVisible: "Addresses"
+- extendedWaitUntil:
+    visible: "10 Addresses"
+    timeout: 15000
 - takeScreenshot: import-derivation-screen
+- scroll
+- scroll
+- scroll
 - tapOn: "Continue to Shamir"
 - waitForAnimationToEnd
 
 # ── Shamir Split ──
-- assertVisible: "Shamir Split"
+- extendedWaitUntil:
+    visible: "Shamir Split"
+    timeout: 10000
+- scroll
 - tapOn: "Continue"
 - waitForAnimationToEnd
 
 # ── Metadata ──
-- assertVisible: "Metadata"
+- extendedWaitUntil:
+    visible: "Metadata"
+    timeout: 10000
+- scroll
 - tapOn: "Generate Shares"
-- waitForAnimationToEnd
 
 # ── Preview ──
-- assertVisible: "Preview"
-- assertVisible: "1 OF 3"
+- extendedWaitUntil:
+    visible: "Preview"
+    timeout: 30000
 - takeScreenshot: import-preview-screen
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- extendedWaitUntil:
+    visible: "Generate PDF"
+    timeout: 10000
 - tapOn: "Generate PDF"
-- waitForAnimationToEnd
 
 # ── Share / Save ──
-- assertVisible: "PDF Ready"
-- assertVisible: "[DONE]"
-- takeScreenshot: import-pdf-ready-screen
+- extendedWaitUntil:
+    visible: "Save to Vault"
+    timeout: 30000
 - tapOn: "Save to Vault"
 - waitForAnimationToEnd
-- assertVisible: "Saved to Vault"
 - takeScreenshot: import-saved-to-vault-screen

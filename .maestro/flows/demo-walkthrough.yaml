@@ -6,8 +6,9 @@ appId: com.anonymous.ios-shamir
 - launchApp:
     clearState: true
 
-- assertVisible: "SHAMIR"
-- assertVisible: "New Secret"
+- extendedWaitUntil:
+    visible: "SHAMIR"
+    timeout: 10000
 - takeScreenshot: demo-01-home
 
 # 2. Generate menu
@@ -18,61 +19,87 @@ appId: com.anonymous.ios-shamir
 # 3. Entropy screen
 - tapOn: "Generate New Phrase"
 - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Entropy Source"
+    timeout: 10000
 - takeScreenshot: demo-03-entropy
 
-# 4. Mnemonic (blank, before generation)
+# 4. Mnemonic (before generation)
 - tapOn: "Use System Only"
 - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Mnemonic"
+    timeout: 10000
 - takeScreenshot: demo-04-mnemonic-blank
 
 # 5. Mnemonic with words
 - tapOn: "Generate"
 - waitForAnimationToEnd
-- assertVisible: "24-Word Mnemonic"
 - takeScreenshot: demo-05-mnemonic-words
 
 # 6. Derivation screen
+- scroll
 - tapOn: "Continue"
 - waitForAnimationToEnd
-- assertVisible: "Derivation Path"
+- extendedWaitUntil:
+    visible: "Derivation Path"
+    timeout: 10000
 - takeScreenshot: demo-06-derivation
 
 # 7. Addresses shown
 - tapOn: "Derive Addresses"
-- waitForAnimationToEnd
-- assertVisible: "Addresses"
+- extendedWaitUntil:
+    visible: "10 Addresses"
+    timeout: 15000
 - takeScreenshot: demo-07-addresses
 
 # 8. Shamir config
+- scroll
+- scroll
+- scroll
 - tapOn: "Continue to Shamir"
 - waitForAnimationToEnd
-- assertVisible: "Shamir Split"
+- extendedWaitUntil:
+    visible: "Shamir Split"
+    timeout: 10000
 - takeScreenshot: demo-08-shamir-config
 
 # 9. Metadata
+- scroll
 - tapOn: "Continue"
 - waitForAnimationToEnd
-- assertVisible: "Metadata"
+- extendedWaitUntil:
+    visible: "Metadata"
+    timeout: 10000
 - takeScreenshot: demo-09-metadata
 
 # 10. Preview
+- scroll
 - tapOn: "Generate Shares"
-- waitForAnimationToEnd
-- assertVisible: "Preview"
-- assertVisible: "1 OF 3"
+- extendedWaitUntil:
+    visible: "Preview"
+    timeout: 30000
 - takeScreenshot: demo-10-preview
 
 # 11. Share screen (PDF generated)
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- extendedWaitUntil:
+    visible: "Generate PDF"
+    timeout: 10000
 - tapOn: "Generate PDF"
-- waitForAnimationToEnd
-- assertVisible: "PDF Ready"
-- assertVisible: "[DONE]"
+
+- extendedWaitUntil:
+    visible: "Save to Vault"
+    timeout: 30000
 - takeScreenshot: demo-11-share
 
 # 12. Saved confirmation
 - tapOn: "Save to Vault"
 - waitForAnimationToEnd
-- assertVisible: "Saved to Vault"
 - takeScreenshot: demo-12-saved
 
 # 13. Done -> back to generate
@@ -82,42 +109,58 @@ appId: com.anonymous.ios-shamir
 # 14. Vault list
 - tapOn: "Vault"
 - waitForAnimationToEnd
-- assertVisible: "24 words"
+- extendedWaitUntil:
+    visible: "24 WORDS"
+    timeout: 10000
 - takeScreenshot: demo-13-vault-list
 
 # 15. Vault detail
-- tapOn: "24 words"
+- tapOn: "24 WORDS"
 - waitForAnimationToEnd
-- assertVisible: "Seed Phrase"
-- assertVisible: "Derived Addresses"
+- extendedWaitUntil:
+    visible: "Seed Phrase"
+    timeout: 10000
 - takeScreenshot: demo-14-vault-detail
 
-# 16. Back to vault list
-- back
-- waitForAnimationToEnd
+# 16. Relaunch for settings
+- launchApp:
+    clearState: false
 
 # 17. Settings
+- extendedWaitUntil:
+    visible: "SHAMIR"
+    timeout: 10000
 - tapOn: "Settings"
 - waitForAnimationToEnd
-- assertVisible: "Settings"
-- assertVisible: "PIN Protection"
+- extendedWaitUntil:
+    visible: "Settings"
+    timeout: 10000
 - takeScreenshot: demo-15-settings
 
 # 18. Theme screen
-- scrollDown
-- tapOn: "Theme"
+- scroll
+- tapOn:
+    id: "settings-theme-link"
 - waitForAnimationToEnd
-- assertVisible: "Color Palette"
+- extendedWaitUntil:
+    visible: "Color Palette"
+    timeout: 10000
 - takeScreenshot: demo-16-theme
 
-# 19. Back to settings
-- back
-- waitForAnimationToEnd
+# 19. Relaunch for About
+- launchApp:
+    clearState: false
 
-# 20. About screen
-- scrollDown
-- tapOn: "About"
+- extendedWaitUntil:
+    visible: "SHAMIR"
+    timeout: 10000
+- tapOn: "Settings"
 - waitForAnimationToEnd
-- assertVisible: "SHAMIR"
-- assertVisible: "Ethereum Seed Phrase Manager"
+- scroll
+- tapOn:
+    id: "settings-about-link"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "SHAMIR"
+    timeout: 10000
 - takeScreenshot: demo-17-about

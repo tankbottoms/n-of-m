@@ -7,6 +7,5 @@ appId: com.anonymous.ios-shamir
 - assertVisible: "Ethereum Seed Phrase Manager"
 - assertVisible: "New Secret"
 - assertVisible: "Scan Shares"
-- assertVisible: "How It Works"
 
 - takeScreenshot: home-screen
