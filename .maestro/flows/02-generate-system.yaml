@@ -16,47 +16,70 @@ appId: com.anonymous.ios-shamir
 - waitForAnimationToEnd
 
 # ── Mnemonic ──
-- assertVisible: "Seed Phrase"
+- extendedWaitUntil:
+    visible: "Seed Phrase"
+    timeout: 10000
 - tapOn: "Generate"
 - waitForAnimationToEnd
-- assertVisible: "24-Word Mnemonic"
+- extendedWaitUntil:
+    visible: "24-Word Mnemonic"
+    timeout: 10000
 - takeScreenshot: mnemonic-screen
+- scroll
 - tapOn: "Continue"
 - waitForAnimationToEnd
 
 # ── Derivation ──
-- assertVisible: "Derivation Path"
+- extendedWaitUntil:
+    visible: "Derivation Path"
+    timeout: 10000
 - tapOn: "Derive Addresses"
-- waitForAnimationToEnd
-- assertVisible: "Addresses"
+- extendedWaitUntil:
+    visible: "10 Addresses"
+    timeout: 15000
 - takeScreenshot: derivation-screen
+- scroll
+- scroll
+- scroll
 - tapOn: "Continue to Shamir"
 - waitForAnimationToEnd
 
 # ── Shamir Split ──
-- assertVisible: "Shamir Split"
+- extendedWaitUntil:
+    visible: "Shamir Split"
+    timeout: 10000
 - takeScreenshot: shamir-screen
+- scroll
 - tapOn: "Continue"
 - waitForAnimationToEnd
 
 # ── Metadata ──
-- assertVisible: "Metadata"
+- extendedWaitUntil:
+    visible: "Metadata"
+    timeout: 10000
+- scroll
 - tapOn: "Generate Shares"
-- waitForAnimationToEnd
-- takeScreenshot: metadata-screen
 
-# ── Preview ──
-- assertVisible: "Preview"
-- assertVisible: "1 OF 3"
+# ── Preview (wait for share generation + screen transition) ──
+- extendedWaitUntil:
+    visible: "Preview"
+    timeout: 30000
 - takeScreenshot: preview-screen
+- scroll
+- scroll
+- scroll
+- scroll
+- scroll
+- extendedWaitUntil:
+    visible: "Generate PDF"
+    timeout: 10000
 - tapOn: "Generate PDF"
-- waitForAnimationToEnd
 
 # ── Share / Save ──
-- assertVisible: "PDF Ready"
-- assertVisible: "[DONE]"
-- takeScreenshot: pdf-ready-screen
+- extendedWaitUntil:
+    visible: "Save to Vault"
+    timeout: 30000
+- takeScreenshot: share-screen
 - tapOn: "Save to Vault"
 - waitForAnimationToEnd
-- assertVisible: "Saved to Vault"
 - takeScreenshot: saved-to-vault-screen

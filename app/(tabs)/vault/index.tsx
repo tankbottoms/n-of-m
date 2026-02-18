@@ -77,6 +77,9 @@ export default function VaultScreen() {
         return (
           <Pressable
             key={secret.id}
+            accessible={false}
+            testID={`vault-card-${secret.id}`}
+            accessibilityLabel={secret.name}
             onPress={() =>
               router.push({
                 pathname: '/(tabs)/vault/[id]',

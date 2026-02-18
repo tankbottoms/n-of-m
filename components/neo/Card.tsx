@@ -14,13 +14,13 @@ export function NeoCard({ title, children, style, showHeader = true }: NeoCardPr
   const { highlight } = useTheme();
 
   return (
-    <View style={[styles.card, SHADOW, style]}>
+    <View style={[styles.card, SHADOW, style]} accessible={false}>
       {showHeader && title && (
         <View style={[styles.header, { backgroundColor: highlight }]}>
           <Text style={styles.headerText}>{title}</Text>
         </View>
       )}
-      <View style={styles.body}>{children}</View>
+      <View style={styles.body} accessible={false}>{children}</View>
     </View>
   );
 }

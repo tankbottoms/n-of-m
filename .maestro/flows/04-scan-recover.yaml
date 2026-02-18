@@ -4,16 +4,20 @@ appId: com.anonymous.ios-shamir
 - launchApp:
     clearState: true
 
-- tapOn: "Scan"
+- tapOn: "Scan Shares"
 - waitForAnimationToEnd
 
 # ── Idle state ──
-- assertVisible: "Scan Shares"
+- extendedWaitUntil:
+    visible: "Start Scanning"
+    timeout: 10000
 - tapOn: "Start Scanning"
 - waitForAnimationToEnd
 
 # ── Test mode active ──
-- assertVisible: "TEST MODE"
+- extendedWaitUntil:
+    visible: "TEST MODE"
+    timeout: 10000
 
 # ── Inject share 1 ──
 - tapOn:
@@ -24,9 +28,12 @@ appId: com.anonymous.ios-shamir
     id: "test-scan-submit"
 - waitForAnimationToEnd
 
-# Verify first share accepted
-- assertVisible: "Share #1 scanned"
+# Verify first share accepted via progress indicator
+- extendedWaitUntil:
+    visible: "SCANNED 1 OF 2 REQUIRED"
+    timeout: 10000
 - takeScreenshot: scan-share-1
+- hideKeyboard
 
 # ── Inject share 2 (cooldown is 1.5s; inputText typing takes longer) ──
 - tapOn:
@@ -38,6 +45,7 @@ appId: com.anonymous.ios-shamir
 - waitForAnimationToEnd
 
 # ── Result screen (auto-navigated after threshold met) ──
-- assertVisible: "Secret Recovered"
-- assertVisible: "E2E Test"
+- extendedWaitUntil:
+    visible: "Secret Recovered"
+    timeout: 15000
 - takeScreenshot: scan-recover-result

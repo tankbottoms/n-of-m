@@ -23,6 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     buildNumber,
+    bundleIdentifier: 'com.anonymous.ios-shamir',
   },
   android: {
     adaptiveIcon: {
