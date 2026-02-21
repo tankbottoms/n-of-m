@@ -27,7 +27,7 @@ import { split } from '../../../lib/shamir';
 import { generatePDF, sharePDF } from '../../../lib/pdf/generate';
 import { renderSingleCardHTML } from '../../../lib/pdf/templates';
 import { LAYOUTS } from '../../../lib/pdf/layouts';
-import { PathType, SharePayload, SecretRecord } from '../../../constants/types';
+import { PathType, SharePayload, SecretRecord, ExportPayload, ExportAddress } from '../../../constants/types';
 
 function formatDate(ts: number): string {
   const d = new Date(ts);
@@ -402,12 +402,12 @@ export default function VaultDetailScreen() {
                   <View key={addr.index}>
                     <View style={styles.addrPathRow}>
                       <NeoBadge text={`#${addr.index}`} variant="outline" />
-                      <Text style={styles.addrPath}>{fullPath}</Text>
                     </View>
                     <AddressRow
                       address={addr}
                       pinned={addr.pinned}
                       onTogglePin={() => handleTogglePin(addr.index)}
+                      derivationPath={fullPath}
                     />
                   </View>
                 );
@@ -613,7 +613,20 @@ export default function VaultDetailScreen() {
         {secret && (
           <View style={{ alignItems: 'center', marginTop: 16 }}>
             <QRCodeView
-              value={JSON.stringify(secret.addresses)}
+              value={JSON.stringify({
+                name: secret.name,
+                createdAt: secret.createdAt,
+                mnemonic: secret.mnemonic,
+                derivationPath: secret.derivationPath,
+                pathType: secret.pathType,
+                addresses: secret.addresses.map((a): ExportAddress => ({
+                  index: a.index,
+                  address: a.address,
+                  privateKey: a.privateKey,
+                  pinned: a.pinned ?? false,
+                  path: getDerivationPath(secret.pathType, a.index, secret.derivationPath),
+                })),
+              } satisfies ExportPayload)}
               size={260}
             />
             <Text style={[styles.bodyText, { marginTop: 12, textAlign: 'center' }]}>
@@ -749,12 +762,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 4,
     marginTop: 4,
-  },
-  addrPath: {
-    fontFamily: NEO.fontMono,
-    fontSize: 11,
-    color: '#999',
-    flex: 1,
   },
   metaEntryRow: {
     flexDirection: 'row',

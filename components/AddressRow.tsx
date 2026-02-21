@@ -9,6 +9,7 @@ interface AddressRowProps {
   address: DerivedAddress;
   pinned?: boolean;
   onTogglePin?: () => void;
+  derivationPath?: string;
 }
 
 function FloatingCopied({ visible, color }: { visible: boolean; color: string }) {
@@ -48,7 +49,7 @@ function FloatingCopied({ visible, color }: { visible: boolean; color: string })
   );
 }
 
-export function AddressRow({ address, pinned, onTogglePin }: AddressRowProps) {
+export function AddressRow({ address, pinned, onTogglePin, derivationPath }: AddressRowProps) {
   const { highlight } = useTheme();
   const [showKey, setShowKey] = useState(false);
   const [copiedField, setCopiedField] = useState<'address' | 'key' | null>(null);
@@ -63,7 +64,7 @@ export function AddressRow({ address, pinned, onTogglePin }: AddressRowProps) {
     <View style={styles.row}>
       {/* Top row: index on left, star on right */}
       <View style={styles.topRow}>
-        <Text style={styles.index}>{address.index}</Text>
+        <Text style={styles.index}>{derivationPath ?? address.index}</Text>
         {onTogglePin && (
           <Pressable onPress={onTogglePin} style={styles.starBtn}>
             <Text style={[styles.starIcon, pinned && { color: highlight }]}>

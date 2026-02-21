@@ -19,13 +19,13 @@ no telemetry, ever.**
 ## Walkthrough
 
 <p align="center">
-  <img src="docs/images/walkthrough-preview.gif" alt="App walkthrough" width="280" />
+  <img src="docs/images/walkthrough-preview.gif" alt="App walkthrough (first 20s)" width="280" />
 </p>
 
 <details>
-<summary>Full video (mp4)</summary>
+<summary>Full walkthrough video</summary>
 
-The full walkthrough video is available at [`docs/images/walkthrough.mp4`](docs/images/walkthrough.mp4).
+Download the full walkthrough: [`walkthrough.mp4`](docs/images/walkthrough.mp4) (3 MB)
 
 </details>
 
@@ -160,8 +160,8 @@ Shamir's Secret Sharing over GF(256) provides unconditional security -- not just
 ### Install
 
 ```bash
-git clone https://github.com/user/ios-shamir.git
-cd ios-shamir
+git clone https://github.com/tankbottoms/n-of-m.git
+cd n-of-m
 npm install
 ```
 
@@ -184,7 +184,7 @@ npm test
 ## Project Structure
 
 ```
-ios-shamir/
+n-of-m/
   app/
     (tabs)/
       index.tsx              Home screen
