@@ -1,0 +1,61 @@
+appId: com.anonymous.iosshamir
+tags:
+  - scan
+  - pin
+---
+- launchApp:
+    clearState: true
+
+# Navigate to scan tab
+- tapOn:
+    id: "scan-tab"
+
+# Inject first PIN-protected share via clipboard
+- runScript:
+    file: ../scripts/inject-share.js
+    env:
+      FIXTURE_FILE: ../fixtures/test-shares-pin.json
+      SHARE_INDEX: "0"
+
+# Tap scan button to start scanning
+- tapOn:
+    id: "scan-button"
+- assertVisible:
+    id: "scan-camera-view"
+
+# Paste first share from clipboard
+- tapOn:
+    id: "paste-share-button"
+
+# Wait for share accepted
+- assertVisible:
+    text: "SCANNED 1 OF 2 REQUIRED"
+
+# Inject second share
+- runScript:
+    file: ../scripts/inject-share.js
+    env:
+      FIXTURE_FILE: ../fixtures/test-shares-pin.json
+      SHARE_INDEX: "1"
+
+- tapOn:
+    id: "paste-share-button"
+
+# Should transition to PIN entry since hasPIN is true
+- assertVisible:
+    id: "pin-entry-screen"
+
+# Enter PIN "1234"
+- tapOn:
+    id: "pin-input"
+- inputText: "1234"
+
+# Submit PIN
+- tapOn:
+    id: "pin-submit-button"
+
+# Verify recovery
+- assertVisible:
+    text: "Secret Recovered"
+
+- takeScreenshot: scan-recover-pin-success

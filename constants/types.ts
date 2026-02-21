@@ -30,6 +30,23 @@ export interface SecretRecord {
   locked?: boolean;
 }
 
+export interface ExportAddress {
+  index: number;
+  address: string;
+  privateKey: string;
+  pinned: boolean;
+  path: string;
+}
+
+export interface ExportPayload {
+  name: string;
+  createdAt: number;
+  mnemonic: string;
+  derivationPath: string;
+  pathType: PathType;
+  addresses: ExportAddress[];
+}
+
 export interface SharePayload {
   v: 1;
   id: string;

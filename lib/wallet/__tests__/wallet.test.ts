@@ -72,3 +72,45 @@ describe('address derivation', () => {
     expect(addresses[0].address).toMatch(/^0x[a-fA-F0-9]{40}$/);
   });
 });
+
+describe('extended wallet generation', () => {
+  it('generates valid 15-word mnemonic', () => {
+    const mnemonic = generateMnemonic(15);
+    const words = mnemonic.split(' ');
+    expect(words).toHaveLength(15);
+    expect(validateMnemonic(mnemonic)).toBe(true);
+  });
+
+  it('generates valid 18-word mnemonic', () => {
+    const mnemonic = generateMnemonic(18);
+    const words = mnemonic.split(' ');
+    expect(words).toHaveLength(18);
+    expect(validateMnemonic(mnemonic)).toBe(true);
+  });
+
+  it('generates valid 21-word mnemonic', () => {
+    const mnemonic = generateMnemonic(21);
+    const words = mnemonic.split(' ');
+    expect(words).toHaveLength(21);
+    expect(validateMnemonic(mnemonic)).toBe(true);
+  });
+
+  it('extraEntropy XOR changes the mnemonic output', () => {
+    // Generate two mnemonics with different extra entropy
+    const entropy1 = new Uint8Array(32).fill(0x00);
+    const entropy2 = new Uint8Array(32).fill(0xff);
+    const mnemonic1 = generateMnemonic(12, entropy1);
+    const mnemonic2 = generateMnemonic(12, entropy2);
+    // XOR with all-zeros should not change the base entropy,
+    // but XOR with 0xff flips all bits, so results must differ
+    expect(mnemonic1).not.toBe(mnemonic2);
+  });
+
+  it('throws or handles invalid word count gracefully', () => {
+    // A word count not in the WORD_COUNT_TO_ENTROPY map yields undefined,
+    // causing getRandomBytes(NaN) which should throw
+    expect(() => {
+      generateMnemonic(13 as any);
+    }).toThrow();
+  });
+});

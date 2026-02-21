@@ -1,0 +1,49 @@
+{
+  "mnemonic": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+  "threshold": 2,
+  "totalShares": 3,
+  "shares": [
+    {
+      "v": 1,
+      "id": "test-e2e-ledger-001",
+      "name": "E2E Ledger Test",
+      "shareIndex": 1,
+      "totalShares": 3,
+      "threshold": 2,
+      "shareData": "0801652cb567175ab9b74cf613777efd38281cd98a92553397d53debcf273a24fa829b62570a9cfd724a997049e613b20e5efb33a74a5fd2f7b8159364afef8292afcc399fa274449da4af7e9bf6fdb1c2c59db46886a9216559cae19d3e0b14a550519e28e97a8446e8ab93cc20a734f8ba199e2de71c1d27534c49e31dd160a14838ca3d2982526c7c4bab1fc8214162a8d0e635206753ecee86c6a5e98144cf2675b6fc2ba50eb6683f9d4bfa2aba69f477120e29120b08c102cb5278475b3f16",
+      "derivationPath": "m/44'/60'/0'/0/0",
+      "pathType": "ledger",
+      "wordCount": 12,
+      "hasPIN": false,
+      "hasPassphrase": false
+    },
+    {
+      "v": 1,
+      "id": "test-e2e-ledger-001",
+      "name": "E2E Ledger Test",
+      "shareIndex": 2,
+      "totalShares": 3,
+      "threshold": 2,
+      "shareData": "0802ca5877ce2eb76fef986e265ffc4170f338cf098baad7331b7a7983ed74eee9ba2ba4aea62556e4382f52927226df1c1feb065326be08f3c12a89c8e0c3bf39e0851223ebe83927f9434e2b52e7d999342715d0a34ff3ca1e896d27df168e5703a241507df4a48c614b8985e353ceedca32415a61388b4e0a9820db99bf665f3370e97ae01915d85496f93e2e4224c4eebdb16af2ce17c56d1123576c1f2e83efea11e5e457ad717c7e95964a54cfd256ee441ce024a710330439a4538e107e8f",
+      "derivationPath": "m/44'/60'/0'/0/0",
+      "pathType": "ledger",
+      "wordCount": 12,
+      "hasPIN": false,
+      "hasPassphrase": false
+    },
+    {
+      "v": 1,
+      "id": "test-e2e-ledger-001",
+      "name": "E2E Ledger Test",
+      "shareIndex": 3,
+      "totalShares": 3,
+      "threshold": 2,
+      "shareData": "0803af74c2a939ecd62cd4ed354782de48ba24368377ff8ba4aa47fc4cab4ea81359b0e6f9c2b9c49616b64cdbf5350f12201015f402e1b5041d3f74ac2e2c5fab2e490bbc279c12ba39ec5eb0c51a0a5b90ba81b84be6bdaf2343e2ba801df8f232f3ff78fa8e4fcaede07449a2f49815112bff77e824f9693dd40738e56e64fe1a480347a79b28b44cdd3c21876307a6276d775fbca92b29e7978bf2e49e084ca89f8719a1f2ccc7704166ddd17e17bbc3997612a736c31896069cf64ac92941f8",
+      "derivationPath": "m/44'/60'/0'/0/0",
+      "pathType": "ledger",
+      "wordCount": 12,
+      "hasPIN": false,
+      "hasPassphrase": false
+    }
+  ]
+}

@@ -6,10 +6,9 @@ import { useTheme } from '../hooks/useTheme';
 interface ScanProgressProps {
   scanned: number;
   threshold: number;
-  total: number;
 }
 
-export function ScanProgress({ scanned, threshold, total }: ScanProgressProps) {
+export function ScanProgress({ scanned, threshold }: ScanProgressProps) {
   const { highlight } = useTheme();
 
   return (
@@ -18,20 +17,16 @@ export function ScanProgress({ scanned, threshold, total }: ScanProgressProps) {
         SCANNED {scanned} OF {threshold} REQUIRED
       </Text>
       <View style={styles.dots}>
-        {Array.from({ length: total }, (_, i) => (
+        {Array.from({ length: threshold }, (_, i) => (
           <View
             key={i}
             style={[
               styles.dot,
               i < scanned && { backgroundColor: highlight },
-              i < threshold && styles.required,
             ]}
           />
         ))}
       </View>
-      {total > 0 && (
-        <Text style={styles.sublabel}>{total} shares total</Text>
-      )}
     </View>
   );
 }
@@ -56,12 +51,5 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: NEO.border,
     backgroundColor: 'transparent',
-  },
-  required: { borderWidth: 3 },
-  sublabel: {
-    fontFamily: NEO.fontMono,
-    fontSize: 12,
-    color: '#999',
-    marginTop: 8,
   },
 });

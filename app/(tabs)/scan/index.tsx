@@ -140,13 +140,16 @@ export default function ScanScreen() {
   return (
     <View style={styles.container}>
       {/* Progress overlay at top */}
-      {scanner.targetTotal > 0 && (
+      {scanner.targetTotal > 0 ? (
         <View style={[styles.progressOverlay, { backgroundColor: NEO.bg }]}>
           <ScanProgress
             scanned={scanner.scannedShares.length}
             threshold={scanner.targetThreshold}
-            total={scanner.targetTotal}
           />
+        </View>
+      ) : (
+        <View style={[styles.progressOverlay, { backgroundColor: NEO.bg }]}>
+          <Text style={styles.scanPrompt}>SCAN QR CODE</Text>
         </View>
       )}
 
@@ -325,6 +328,15 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     textAlign: 'center',
     marginBottom: 16,
+  },
+  scanPrompt: {
+    fontFamily: NEO.fontUIBold,
+    fontSize: 16,
+    color: NEO.text,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    textAlign: 'center',
+    padding: 16,
   },
   testInput: {
     fontFamily: NEO.fontMono,

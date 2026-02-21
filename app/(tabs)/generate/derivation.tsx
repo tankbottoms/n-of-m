@@ -175,11 +175,11 @@ export default function DerivationScreen() {
                 : DERIVATION_PATHS[pathType].template.replace('{index}', String(addr.index));
               return (
                 <View key={addr.index}>
-                  <Text style={styles.addrPathText}>{fullPath}</Text>
                   <AddressRow
                     address={addr}
                     pinned={pinnedIndices.has(addr.index)}
                     onTogglePin={() => handleTogglePin(addr.index)}
+                    derivationPath={fullPath}
                   />
                 </View>
               );
@@ -266,11 +266,4 @@ const styles = StyleSheet.create({
   },
   countBtn: { minWidth: 50 },
   addressSection: { marginTop: 20 },
-  addrPathText: {
-    fontFamily: NEO.fontMono,
-    fontSize: 11,
-    color: '#999',
-    marginTop: 8,
-    marginBottom: 2,
-  },
 });

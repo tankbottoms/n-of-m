@@ -1,4 +1,4 @@
-import { gcm } from '@noble/ciphers/aes';
+import { gcm } from '@noble/ciphers/aes.js';
 import * as ExpoCrypto from 'expo-crypto';
 
 export async function encrypt(plaintext: string, keyHex: string): Promise<string> {

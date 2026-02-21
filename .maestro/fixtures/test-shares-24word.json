@@ -1,0 +1,77 @@
+{
+  "mnemonic": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art",
+  "threshold": 3,
+  "totalShares": 5,
+  "shares": [
+    {
+      "v": 1,
+      "id": "test-e2e-24w-001",
+      "name": "E2E 24-word Test",
+      "shareIndex": 1,
+      "totalShares": 5,
+      "threshold": 3,
+      "shareData": "08016341c537507d3ba91e9d199a559b5b1ae07a63d4e68d88512ef7cc8ede02f080467b51ff3ece12fa4ca5ae2f47f527a4e8ea9530eccfb68e21b6f42589a3b0c5f7650d6fdb2ffd1c574f6d24d26b617e9528020a89b45b9cf8c261ae5758623cdb7cf5fb0cb80a7b8476c25264977810a87c66b3ee60f23351a610f12f65b4c7c955f990ee719abeeb2324688ff92e9992b053375f9daa18bec3f8482c85919a75b1cbdc08b11de36f96663abec1070a6a7b3ecff32f28c56cfa9c376a8d063a39ad69e67cc65101c8e7ce7835dcb5b7293a2c4d43da36733d63acb106decf2ff6ab6cf88831c5cdac70c705e4d1af9e2118deac870ffbab4a37b66646d6c6e1409242ebcb977077305fe7d69ba4aef039ea43f21733728d14b6fdc1d32c80b0ee0e192c59b4da206e1788e62b335edcf5b1e41ec98614d29a8d31e58aba686a6c9cacab2a2e67a9d70de14594896a065a1d0fda41952abeadb90f8cc1c659636258aef23e0a07646c5bb388bdca0da45127c0a5fdf6d6151eb8232633ea5acb",
+      "derivationPath": "m/44'/60'/0'/0",
+      "pathType": "metamask",
+      "wordCount": 24,
+      "hasPIN": false,
+      "hasPassphrase": false
+    },
+    {
+      "v": 1,
+      "id": "test-e2e-24w-001",
+      "name": "E2E 24-word Test",
+      "shareIndex": 2,
+      "totalShares": 5,
+      "threshold": 3,
+      "shareData": "0802d9f677d558fc086dff59f8a9d86e27e817c9fb739cd7b4887d91d5b26392f3de034f6a52cdf4434ca9619075400c03070c4958e69aafdcf22423c1960b16afd82b3f39f548b5434ab7d8ce656e097107271d07ed7aa321a8b2c6c9a54dcbed65881f09fccde2af9bc8f14b8c9ced765e11ba1442df4c5239c2a7808138820d853e31249764195644a8015bcf7400e7d70e38c8625a5447c9e280a7eec52b1e68fda0c7f76937257f7a934b420aa4ef4b6a64f474af530e25395b4dc2d515056d7c0bd27c761b1191e19521581b18811f82dd21bd192b8dda66d70e708b62ef1f7711b218fef70edbbc18032f354f1e3cfe22b488c5a09e089216385b8dfd2333571ef94d52b7b17f3b3f32703da8196229e1f3691700e50cd4ace7df81a432025378a71f24a21f3ceb4b15e7f95140b63f67ba587aab5fc5a8321265767ac29f7d92b2c2d02032c98695b2677ba8638cc68471ec60bb6a4f5e2a2e862b161c07ecf68893b3034a71499aa1543c547edcf62baca68611cbfad50f6db90306cc74",
+      "derivationPath": "m/44'/60'/0'/0",
+      "pathType": "metamask",
+      "wordCount": 24,
+      "hasPIN": false,
+      "hasPassphrase": false
+    },
+    {
+      "v": 1,
+      "id": "test-e2e-24w-001",
+      "name": "E2E 24-word Test",
+      "shareIndex": 3,
+      "totalShares": 5,
+      "threshold": 3,
+      "shareData": "0803bab7b2e2088133c4e1c5e1478d877c93f79398c97a353cbd5308195dbdf2033f45143bc3f35551d2e5aa3e3b079b24c2e483cdb8760f6a1805fb35d282d71f7cdc7a34f493f5be32e0f9a320bc001018b2150589f3787a504a6aa86a1af18f385343fc69c135a5844ce989bff8180e2fb9e6729f3143a06e936f90111785b923f744dd698a07cc9e434c7fc6fb9bc92f9ca89b3b05a6edb55c2d5fc7e9cc8f9388310c4561e938f8156b2d19b407e820003fcad55c13268455cfd194bffa03364586bbf40ab240f4291cef412ea634c9abc70d9e5a9ebbcd5bdaa2a08dde2051819ade8e76a9cb721006c44bd1fcb1c3df1a6a4a42c065c7d84f8e5ccb49e5b317acbbc8994fc16c0b0ed5c7a66eb7f3102bb0f5005c97e5c0741a7f52eab2d3bd56be5d7d79c57885329d60d2001e0bcaf65e28b3424b7332d123e1fca2aa94112e1e07fa61550451f65343ef4309eb9cb97e5821414095f3fd216beab245058e8e260f8d664d7125af12bd81fc7319a72c6c6d7b881d8bcbd94efe308e96de",
+      "derivationPath": "m/44'/60'/0'/0",
+      "pathType": "metamask",
+      "wordCount": 24,
+      "hasPIN": false,
+      "hasPassphrase": false
+    },
+    {
+      "v": 1,
+      "id": "test-e2e-24w-001",
+      "name": "E2E 24-word Test",
+      "shareIndex": 4,
+      "totalShares": 5,
+      "threshold": 3,
+      "shareData": "0804d33c496177fdf552c858e2a37821308f21861f990c9bab837eeaea9ae95fc39f00bdd31a797307108b5a5e539fd72f4e3b5511b348bc2b34cd534f7306012c991170fe1b3bb32c6717e8d16ba74d14d00eee02443d6b246518b0a3f5317e63ab8178cdf9f49095a4decbf9b0689cce4c4f816f20dbdd323504eca7eff520e75a82c943e166b64d3adc43faea299f0561c08428b40336b66aef316631d9a2b8dcbbfbbee62b1c36725ec9b049a5bd60e21647ef530edd799ed1042706b3662eabc0c6b936ee6bd46f7272f83feffae0867ec4bbbb742ba47fbcb72dc92deb6e32ccaacc830ad242e0a6b77cdfcd7d55192bf1215ee8d0e827219149c503ceb4e4d55d06f8e71626a60700c7d6229a4f97238232e8cacad3126256d3abf786d8f0d4803d7f2a6ddcb3175f4a1e697a57287953c87d07d67f5c73f0f92d0dbcd107542282c797e2b38bc571d048d3ef202a442a438c6f2e2c00d81d9c32bc0eba3865090ece6015991aecd910c409ff71aebc2281f288ca7ea834cb76898f137826",
+      "derivationPath": "m/44'/60'/0'/0",
+      "pathType": "metamask",
+      "wordCount": 24,
+      "hasPIN": false,
+      "hasPassphrase": false
+    },
+    {
+      "v": 1,
+      "id": "test-e2e-24w-001",
+      "name": "E2E 24-word Test",
+      "shareIndex": 5,
+      "totalShares": 5,
+      "threshold": 3,
+      "shareData": "0805b07d8c562780cefbd6c4fb4d2dc86bf4c1dc7c23ea7923b650732675373f337e46e6828b47d2158ec791f01dd840088bd39f84eda41c9ddeec8bbb378fc09c3de635f31ae0f3d11f40c9bc2e754475cf9be60020b4b07f9de01cc23a664401f65a24386cf8479fbb5ad33b830c69b63de7dd09fd35d2c0625524b77fda2753fc4bbcba1f88a8d7e0370edee3a6042b9952147bed5cc41c16519c9e18f5452927ce6a755423c22bf53131d6121b1e67897c1cd1f2fd9d513fbd90bb50d98928f0f94bd0be92c2850abafb3626da44555057de9798379e926881ba81192b57a17c3a21a015828c87490aa9bbbb29cefae60ac9ff9c6fb013e86bc8ffc2457a726495ef447d2cee56b537312061b95ce1061a487174dd96a1fb768e2e0b24c858213aae243d73b606f77926c299422b09958cc22c0dce3f6beae913c8a98764b90c389e2e02bda3d4461212316c47044a4d1e174c382ed406da75ca93df7daae33a0771a0525e709e1a80eca32db4577c6bed2541397553a8d92a1d55cebc9b228c",
+      "derivationPath": "m/44'/60'/0'/0",
+      "pathType": "metamask",
+      "wordCount": 24,
+      "hasPIN": false,
+      "hasPassphrase": false
+    }
+  ]
+}
