@@ -7,6 +7,14 @@
       "eas": {
         "projectId": "bffd8073-861a-4a80-9d84-e00eca0464fa"
       }
+    },
+    "ios": {
+      "supportsTablet": true,
+      "buildNumber": "2",
+      "bundleIdentifier": "xyz.atsignhandle.n-of-m",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     }
   }
 }
