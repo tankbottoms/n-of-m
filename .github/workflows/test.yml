@@ -13,6 +13,7 @@ on:
       - '__tests__/**'
       - 'package.json'
       - 'tsconfig.json'
+      - 'jest.config*.js'
   push:
     branches: [main]
     paths:
@@ -25,6 +26,7 @@ on:
       - '__tests__/**'
       - 'package.json'
       - 'tsconfig.json'
+      - 'jest.config*.js'
 
 jobs:
   test:

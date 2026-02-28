@@ -29,6 +29,7 @@ on:
       - 'app.config.ts'
       - 'package.json'
       - 'eas.json'
+      - 'jest.config*.js'
 
 jobs:
   test:
