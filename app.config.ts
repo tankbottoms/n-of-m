@@ -47,7 +47,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     typedRoutes: true,
   },
+  owner: 'tankbottoms',
   extra: {
+    ...config.extra,
     buildNumber: buildData.build,
   },
 });

@@ -71,17 +71,6 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Debug config
-        run: |
-          echo "=== app.json ==="
-          cat app.json
-          echo ""
-          echo "=== expo config ==="
-          npx expo config --type public 2>&1 || true
-          echo ""
-          echo "=== eas whoami ==="
-          eas whoami 2>&1 || true
-
       - name: Decode ASC API Key
         run: |
           mkdir -p ~/private_keys
