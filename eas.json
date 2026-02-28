@@ -26,7 +26,8 @@
         "ascAppId": "87993010",
         "appleTeamId": "YT6VJY3L35",
         "ascApiKeyId": "CQ4RG4V29Z",
-        "ascApiKeyIssuerId": "99378080-0c4d-4766-8324-cf017d97e6a1"
+        "ascApiKeyIssuerId": "99378080-0c4d-4766-8324-cf017d97e6a1",
+        "ascApiKeyPath": "~/private_keys/AuthKey.p8"
       }
     }
   }
