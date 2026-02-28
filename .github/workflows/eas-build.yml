@@ -1,0 +1,117 @@
+name: EAS Build & Submit
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Target platform
+        type: choice
+        options: [ios, android, all]
+        default: ios
+      profile:
+        description: Build profile
+        type: choice
+        options: [development, preview, production]
+        default: production
+      auto_submit:
+        description: Auto-submit to store
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'constants/**'
+      - 'hooks/**'
+      - 'lib/**'
+      - 'utils/**'
+      - 'app.config.ts'
+      - 'package.json'
+      - 'eas.json'
+
+jobs:
+  test:
+    name: Unit & Component Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run component tests
+        run: npm run test:components
+
+  build:
+    name: EAS Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Decode ASC API Key
+        run: |
+          mkdir -p ~/private_keys
+          echo "$ASC_KEY_BASE64" | base64 --decode > ~/private_keys/AuthKey.p8
+        env:
+          ASC_KEY_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
+
+      - name: Set build parameters
+        id: params
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "platform=$INPUT_PLATFORM" >> "$GITHUB_OUTPUT"
+            echo "profile=$INPUT_PROFILE" >> "$GITHUB_OUTPUT"
+            echo "auto_submit=$INPUT_AUTO_SUBMIT" >> "$GITHUB_OUTPUT"
+          else
+            echo "platform=ios" >> "$GITHUB_OUTPUT"
+            echo "profile=production" >> "$GITHUB_OUTPUT"
+            echo "auto_submit=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_PLATFORM: ${{ inputs.platform }}
+          INPUT_PROFILE: ${{ inputs.profile }}
+          INPUT_AUTO_SUBMIT: ${{ inputs.auto_submit }}
+
+      - name: Run EAS Build
+        run: |
+          SUBMIT_FLAG=""
+          if [ "$AUTO_SUBMIT" = "true" ] && [ "$PROFILE" = "production" ]; then
+            SUBMIT_FLAG="--auto-submit"
+          fi
+
+          eas build \
+            --platform "$PLATFORM" \
+            --profile "$PROFILE" \
+            --non-interactive \
+            --no-wait \
+            $SUBMIT_FLAG
+        env:
+          PLATFORM: ${{ steps.params.outputs.platform }}
+          PROFILE: ${{ steps.params.outputs.profile }}
+          AUTO_SUBMIT: ${{ steps.params.outputs.auto_submit }}
+          EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          EXPO_ASC_API_KEY_PATH: ~/private_keys/AuthKey.p8
+          EXPO_ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
+          EXPO_ASC_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}
