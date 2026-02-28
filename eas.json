@@ -15,9 +15,9 @@
       "distribution": "internal"
     },
     "production": {
-      "appleTeamId": "YT6VJY3L35",
       "ios": {
-        "autoIncrement": true
+        "autoIncrement": true,
+        "appleTeamId": "YT6VJY3L35"
       }
     }
   },
