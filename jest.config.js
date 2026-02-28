@@ -9,7 +9,7 @@ module.exports = {
     '^expo-crypto$': '<rootDir>/lib/__mocks__/expo-crypto',
     '^expo-secure-store$': '<rootDir>/lib/__mocks__/expo-secure-store',
     '^expo-file-system/legacy$': '<rootDir>/lib/__mocks__/expo-file-system',
-    '^@noble/ciphers/(.*)$': '@noble/ciphers/$1.js',
+    '^@noble/ciphers/(.*)\\.js$': '@noble/ciphers/$1.js',
     '^@/(.*)$': '<rootDir>/$1',
   },
   transformIgnorePatterns: [
