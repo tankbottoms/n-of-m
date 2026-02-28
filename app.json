@@ -1,5 +1,8 @@
 {
   "expo": {
+    "name": "n of m",
+    "slug": "ios-shamir",
+    "owner": "tankbottoms",
     "extra": {
       "eas": {
         "projectId": "bffd8073-861a-4a80-9d84-e00eca0464fa"
