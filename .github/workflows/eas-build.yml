@@ -73,8 +73,8 @@ jobs:
 
       - name: Decode ASC API Key
         run: |
-          mkdir -p ~/private_keys
-          echo "$ASC_KEY_BASE64" | base64 --decode > ~/private_keys/AuthKey.p8
+          mkdir -p private_keys
+          echo "$ASC_KEY_BASE64" | base64 --decode > private_keys/AuthKey.p8
         env:
           ASC_KEY_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
 
@@ -114,6 +114,6 @@ jobs:
           PROFILE: ${{ steps.params.outputs.profile }}
           AUTO_SUBMIT: ${{ steps.params.outputs.auto_submit }}
           EXPO_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          EXPO_ASC_API_KEY_PATH: ~/private_keys/AuthKey.p8
+          EXPO_ASC_API_KEY_PATH: ./private_keys/AuthKey.p8
           EXPO_ASC_KEY_ID: ${{ secrets.ASC_API_KEY_ID }}
           EXPO_ASC_ISSUER_ID: ${{ secrets.ASC_API_KEY_ISSUER_ID }}

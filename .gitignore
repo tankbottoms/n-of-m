@@ -34,6 +34,9 @@ yarn-error.*
 .claude
 .github-commit-messages
 
+# private keys
+private_keys/
+
 # local env files
 .env*.local
 
