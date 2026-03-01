@@ -8,7 +8,7 @@ printable QR code cards.
 
 - **Framework**: Maestro 2.1.0
 - **Platform**: iOS Simulator (iPhone 17 Pro, iOS 26.2)
-- **App Bundle ID**: `com.anonymous.ios-shamir`
+- **App Bundle ID**: `xyz.atsignhandle.n-of-m`
 - **Total flows**: 7
 - **Full suite run time**: ~6 minutes
 

@@ -1,4 +1,4 @@
-appId: com.anonymous.ios-shamir
+appId: xyz.atsignhandle.n-of-m
 ---
 # ── Navigate to Scan tab ──
 - launchApp:

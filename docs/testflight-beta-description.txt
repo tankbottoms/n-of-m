@@ -1,0 +1,26 @@
+SHAMIR - Ethereum Seed Phrase Manager
+
+Securely generate BIP39 seed phrases and split them into Shamir secret shares. Distribute shares across multiple locations and reconstruct your seed phrase by scanning the required threshold of QR codes.
+
+FEATURES
+
+- Generate BIP39 mnemonic seed phrases (12-24 words)
+- Derive Ethereum addresses from generated phrases
+- Split seed phrases into N shares using Shamir's Secret Sharing
+- Configure threshold M -- any M of N shares reconstructs the original
+- Export shares as printable PDF cards with QR codes
+- Scan share QR codes with your camera to reconstruct seed phrases
+- Import existing seed phrases for splitting
+- Encrypted local vault with AES-256 and device-bound master key
+- Optional PIN protection for vault access
+- Optional passphrase (BIP39 25th word) support
+- Optional Ledger-compatible derivation paths
+
+SECURITY
+
+- Fully offline. No network requests, no telemetry, no analytics.
+- Vault data encrypted at rest using AES-256 with a key stored in the secure enclave.
+- Shamir's Secret Sharing uses GF(256) polynomial interpolation with information-theoretic security.
+- No third-party servers. Your secrets never leave your device except as printed QR codes.
+
+This app is designed for self-custody users who want a mathematically secure way to back up and distribute their seed phrases without relying on any third party.

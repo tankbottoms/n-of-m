@@ -111,13 +111,16 @@ export default function AboutScreen() {
         </View>
       </NeoCard>
 
-      <NeoCard title="Author" style={styles.section}>
-        <Text style={styles.bodyText}>Created by Mark Phillips</Text>
+      <NeoCard title="Contact" style={styles.section}>
+        <Pressable onPress={() => Linking.openURL('https://n-of-m.atsignhandle.xyz')}>
+          <Text style={[styles.bodyText, styles.emailLink]}>
+            n-of-m.atsignhandle.xyz
+          </Text>
+        </Pressable>
         <View style={{ marginTop: 8 }}>
-          <Text style={styles.bodyText}>Send a note to the author:</Text>
           <Pressable onPress={() => Linking.openURL('mailto:rooot@atsignhandle.xyz')}>
             <Text style={[styles.bodyText, styles.emailLink]}>
-              rooot [at] atsignhandle dot xyz
+              rooot [at] atsignhandle [dot] xyz
             </Text>
           </Pressable>
         </View>
@@ -138,9 +141,6 @@ export default function AboutScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Built with Expo, React Native, and ethers.js
-        </Text>
-        <Text style={[styles.footerText, { marginTop: 4 }]}>
           {FULL_VERSION}
         </Text>
       </View>

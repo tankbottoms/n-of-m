@@ -36,6 +36,7 @@ yarn-error.*
 
 # private keys
 private_keys/
+credentials.json
 
 # local env files
 .env*.local
