@@ -565,7 +565,7 @@ If this fails due to module resolution (the app uses ESM/TypeScript), we need an
 Create a simple test file that outputs share payloads:
 
 ```bash
-cd /Users/mark.phillips/Developer/n-of-m
+cd /path/to/n-of-m
 npx jest --testPathPattern="shamir" --verbose 2>&1 | head -20
 ```
 
